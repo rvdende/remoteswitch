@@ -21,8 +21,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
     </Head>
 
     <SessionProvider session={session}>
-      
-      <Component {...pageProps} />
+      <div className="w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0 transition-all dark:bg-zinc-800">
+        <Component {...pageProps} />
+      </div>
     </SessionProvider>
 
   </ThemeProvider>

@@ -124,11 +124,29 @@ export function Navbar(props: {
                                 </div>
                             </div> : null}
                             <div className="flex lg:hidden">
+
+                                <div className='flex flex-row space-x-2 mr-2 mt-1'>
+                                    <div className=''><DarkMode /></div>
+
+                                    {session.status === 'authenticated' &&
+                                        <div>
+                                            <IconButton
+                                                srText="View notifications"
+                                            >
+                                                <BellIcon className="h-6 w-6" aria-hidden="true" />
+                                            </IconButton>
+                                        </div>}
+                                </div>
+
+
+
                                 {/* Mobile menu button */}
                                 <Disclosure.Button className={classnames(`inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-inset`,
                                     `text-zinc-600 hover:bg-zinc-300 hover:text-zinc-800 focus:ring-zinc-300`,
                                     `dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white dark:focus:ring-zinc-700`
                                 )}>
+
+
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
                                         <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -139,13 +157,15 @@ export function Navbar(props: {
                             </div>
                             <div className="hidden lg:ml-4 lg:block">
                                 <div className="flex items-center">
-
                                     <DarkMode />
-                                    <IconButton
-                                        srText="View notifications"
-                                    >
-                                        <BellIcon className="h-6 w-6" aria-hidden="true" />
-                                    </IconButton>
+                                    
+                                    {session.status === 'authenticated' && <>
+                                        <IconButton
+                                            srText="View notifications"
+                                        >
+                                            <BellIcon className="h-6 w-6" aria-hidden="true" />
+                                        </IconButton>
+                                    </>}
 
                                     {session.status === 'unauthenticated' ? <>
                                         <Link href="/signin"><button className='ml-4 text-sm opacity-70'>Sign In</button></Link>
@@ -186,52 +206,53 @@ export function Navbar(props: {
                             )}
 
                         </div>
-                        <div className="bg-zinc-100 pt-4 pb-3 shadow-xl dark:bg-zinc-700">
+                        <div className="bg-zinc-100 pt-0 pb-3 shadow-xl dark:bg-zinc-700">
                             <div className="flex px-5">
 
-                                <AvatarCircle />
 
-                                <div className='flex-1' />
 
-                                <DarkMode />
 
-                                {session.status === 'authenticated' && <IconButton
-                                    srText="View notifications"
-                                >
-                                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                                </IconButton>}
+
+                                {session.status === 'authenticated' && <div className='flex flex-row mt-3 space-x-4'>
+                                    <AvatarCircle />
+                                    <IconButton
+                                        srText="View notifications"
+                                    >
+                                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                                    </IconButton>
+                                </div>}
                             </div>
 
-                            
-                                {session.status === 'authenticated' && <div className="mt-3 space-y-1 px-2">
-                                    {NavBarProfileMenu.map(nav => <Disclosure.Button key={nav.name}
+
+                            {session.status === 'authenticated' && <div className="mt-3 space-y-1 px-2">
+                                {NavBarProfileMenu.map(nav => <Disclosure.Button key={nav.name}
                                     as="a"
                                     href={nav.href}
                                     className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
                                 >
                                     {nav.name}
                                 </Disclosure.Button>)}
-                                </div>}
+                            </div>}
 
-                                {session.status === 'unauthenticated' && <div className='px-2 mt-3'>
-                                    <Disclosure.Button
-                                        as="a"
-                                        href="/signin"
-                                        className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                                    >
-                                        Sign In
-                                    </Disclosure.Button>
+                            {session.status === 'unauthenticated' && <div className='px-2 mt-3'>
+                                <Disclosure.Button
+                                    as="a"
+                                    href="/signin"
+                                    className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                                >
+                                    Sign In
+                                </Disclosure.Button>
 
-                                    <Chiplet
-                                        title="beta"
-                                        description="Sign Up"
-                                        href="/signup"
-                                    />
+                                <Chiplet
+                                    title="beta"
+                                    description="Sign Up"
+                                    href="/signup"
+                                />
 
-                                </div>}
-                            </div>
+                            </div>}
+                        </div>
 
-                        
+
                     </Disclosure.Panel>
                 </>
             )}
