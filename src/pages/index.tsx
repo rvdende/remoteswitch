@@ -12,17 +12,19 @@ const Home: NextPage = () => {
   // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
   const session = useSession();
 
-  if (session.data?.user) return <App />
+  if (session.status === 'loading') return <span>loading...</span>
 
-  return (
+  if (session.data?.user && session.status === 'authenticated') return <App />
+
+  if (session.status === 'unauthenticated') return (
     <>
 
       <Navbar
-        nav={[
-          // { name: 'Home', href: "/", active: false },
-          { name: 'Docs', href: '#docs' },
-          { name: 'Pricing', href: '#pricing' },
-        ]}
+
+        // nav={[
+        //   { name: 'Docs', href: '#docs' },
+        //   { name: 'Pricing', href: '#pricing' },
+        // ]}
       />
 
       <main>
@@ -57,6 +59,8 @@ const Home: NextPage = () => {
       </main>
     </>
   );
+
+  return <div>error.</div>
 };
 
 export default Home;

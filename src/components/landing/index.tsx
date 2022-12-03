@@ -1,5 +1,5 @@
 export * from './container'
-export * from './navbar'
+export * from '../navbar/navbar'
 export * from './select'
 export * from './darkmode'
 export * from './iconbutton'

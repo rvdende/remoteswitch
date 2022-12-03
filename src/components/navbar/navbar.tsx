@@ -25,13 +25,16 @@ import Image from 'next/image'
 // import FlagZA from '@/images/flag_za.png';
 import { useTheme } from 'next-themes'
 import classNames from 'classnames'
-import { Chiplet } from './hero/components/chiplet'
-import { NavBarAvatarMenu } from '../navbarAvatarMenu/navbarAvatarMenu'
+import { Chiplet } from '../landing/hero/components/chiplet'
+
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 export function Navbar(props: {
     nav?: { name: string, href: string, active?: boolean }[]
     search?: boolean
 }) {
+    const session = useSession();
     const [mounted, setMounted] = useState(false);
     const { systemTheme, theme, setTheme } = useTheme();
     const currentTheme = theme === "system" ? systemTheme : theme;
@@ -48,7 +51,18 @@ export function Navbar(props: {
         setMounted(true);
     }, [])
 
-
+    const DarkMode = () => <IconButton
+        srText={(mounted && (currentTheme !== 'dark')) ? 'toggle light mode' : 'toggle dark mode'}
+        onClick={() => {
+            const systemThemeUpdate = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(systemThemeUpdate)
+        }}>
+        {mounted ? <>
+            {currentTheme === 'dark'
+                ? <SunIcon className="h-6 w-6 transition-all :hover:text-zinc-400" aria-hidden="true" />
+                : <SunIcon className="h-6 w-6 transition-all text-orange-400 :hover:text-yellow-200" aria-hidden="true" />}
+        </> : <SunIcon className="h-6 w-6 transition-all" aria-hidden="true" />}
+    </IconButton>
 
     return (
         <Disclosure as="nav" className="bg-white dark:bg-zinc-800">
@@ -126,37 +140,27 @@ export function Navbar(props: {
                             <div className="hidden lg:ml-4 lg:block">
                                 <div className="flex items-center">
 
-                                    <IconButton
-                                        srText={(mounted && (currentTheme !== 'dark')) ? 'toggle light mode' : 'toggle dark mode'}
-                                        onClick={() => {
-                                            const systemThemeUpdate = currentTheme === 'dark' ? 'light' : 'dark';
-                                            setTheme(systemThemeUpdate)
-                                        }}>
-                                        {mounted ? <>
-                                            {currentTheme === 'dark'
-                                                ? <SunIcon className="h-6 w-6 transition-all :hover:text-zinc-400" aria-hidden="true" />
-                                                : <SunIcon className="h-6 w-6 transition-all text-orange-400 :hover:text-yellow-200" aria-hidden="true" />}
-                                        </> : <SunIcon className="h-6 w-6 transition-all" aria-hidden="true" />}
-                                    </IconButton>
-
+                                    <DarkMode />
                                     <IconButton
                                         srText="View notifications"
                                     >
                                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                                     </IconButton>
 
+                                    {session.status === 'unauthenticated' ? <>
+                                        <Link href="/signin"><button className='ml-4 text-sm opacity-70'>Sign In</button></Link>
 
-                                    
-                                    <NavBarAvatarMenu />
-                                    
+                                        <Chiplet
+                                            title="beta"
+                                            description="Sign Up"
+                                            href="/signup"
+                                            className='ml-4'
+                                        />
+                                    </> : <>
+                                        <NavBarAvatarMenu />
+                                    </>}
 
 
-                                    <Chiplet
-                                        title="beta"
-                                        description="Sign Up"
-                                        href="/signup"
-                                        className='ml-4'
-                                    />
 
                                 </div>
                             </div>
@@ -182,54 +186,120 @@ export function Navbar(props: {
                             )}
 
                         </div>
-                        <div className="border-t border-zinc-700 pt-4 pb-3">
-                            <div className="flex items-center px-5">
-                                <div className="flex-shrink-0">
-                                    <img
-                                        className="h-10 w-10 rounded-full"
-                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                        alt=""
-                                    />
-                                </div>
-                                <div className="ml-3">
-                                    <div className="text-base font-medium text-white">Tom Cook</div>
-                                    <div className="text-sm font-medium text-zinc-400">tom@example.com</div>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="ml-auto flex-shrink-0 rounded-full bg-zinc-800 p-1 text-zinc-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-800"
+                        <div className="bg-zinc-100 pt-4 pb-3 shadow-xl dark:bg-zinc-700">
+                            <div className="flex px-5">
+
+                                <AvatarCircle />
+
+                                <div className='flex-1' />
+
+                                <DarkMode />
+
+                                {session.status === 'authenticated' && <IconButton
+                                    srText="View notifications"
                                 >
-                                    <span className="sr-only">View notifications</span>
                                     <BellIcon className="h-6 w-6" aria-hidden="true" />
-                                </button>
+                                </IconButton>}
                             </div>
-                            <div className="mt-3 space-y-1 px-2">
-                                <Disclosure.Button
+
+                            
+                                {session.status === 'authenticated' && <div className="mt-3 space-y-1 px-2">
+                                    {NavBarProfileMenu.map(nav => <Disclosure.Button key={nav.name}
                                     as="a"
-                                    href="#"
+                                    href={nav.href}
                                     className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
                                 >
-                                    Your Profile
-                                </Disclosure.Button>
-                                <Disclosure.Button
-                                    as="a"
-                                    href="#"
-                                    className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                                >
-                                    Settings
-                                </Disclosure.Button>
-                                <Disclosure.Button
-                                    as="a"
-                                    href="#"
-                                    className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                                >
-                                    Sign out
-                                </Disclosure.Button>
+                                    {nav.name}
+                                </Disclosure.Button>)}
+                                </div>}
+
+                                {session.status === 'unauthenticated' && <div className='px-2 mt-3'>
+                                    <Disclosure.Button
+                                        as="a"
+                                        href="/signin"
+                                        className="block rounded-md px-3 py-2 text-base font-medium text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                                    >
+                                        Sign In
+                                    </Disclosure.Button>
+
+                                    <Chiplet
+                                        title="beta"
+                                        description="Sign Up"
+                                        href="/signup"
+                                    />
+
+                                </div>}
                             </div>
-                        </div>
+
+                        
                     </Disclosure.Panel>
                 </>
             )}
         </Disclosure>
     )
 }
+
+
+export const NavBarProfileMenu = [{
+    name: "Your Profile",
+    href: "/profile"
+}, {
+    name: "Settings",
+    href: "/settings",
+}, {
+    name: "Sign out",
+    href: "/signout"
+}]
+
+export const AvatarCircle = () => {
+    const session = useSession();
+
+    if (session.status === 'unauthenticated') return null;
+
+    return <div
+        className="h-8 pt-1.5 px-3 font-sm font-semibold rounded-full text-zinc-500 bg-zinc-200 bg-opacity-90 dark:bg-zinc-700 dark:text-zinc-300"
+    >
+        {session.data?.user?.name}
+    </div>
+}
+
+export const NavBarAvatarMenu = () => {
+    const session = useSession();
+    {/* Profile dropdown */ }
+    return <Menu as="div" className="relative ml-2 flex-shrink-0">
+        <div>
+            <Menu.Button className="flex rounded-full text-sm text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-800">
+                <span className="sr-only">Open user menu</span>
+                <AvatarCircle />
+            </Menu.Button>
+        </div>
+        <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+        >
+            <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md overflow-hidden bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-zinc-700">
+                {NavBarProfileMenu.map(nav => <Menu.Item key={nav.name}>
+                    {({ active }) => (
+                        <Link
+                            href={nav.href}
+                            className={classnames(
+                                'block px-4 py-2 text-sm ',
+                                active ? 'text-zinc-500 dark:text-emerald-500 bg-zinc-100 dark:bg-zinc-600' : 'text-zinc-400',
+
+                            )}
+                        >
+                            {nav.name}
+                        </Link>
+                    )}
+                </Menu.Item>)}
+
+            </Menu.Items>
+        </Transition>
+    </Menu>
+}
+

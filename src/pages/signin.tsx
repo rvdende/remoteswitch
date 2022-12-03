@@ -22,7 +22,7 @@ export const LoginForm = () => {
 
   const onSubmit: SubmitHandler<ILogin> = async (data) => {
     console.log(data);
-    const result = await signIn("credentials", { ...data, callbackUrl: "/dashboard" });
+    const result = await signIn("credentials", { ...data, callbackUrl: "/" });
     console.log(result);
   };
 
@@ -34,14 +34,14 @@ export const LoginForm = () => {
         )}
         <label>Email</label>
         <input
-          className="rounded border py-1 px-4"
+          className="rounded border py-1 px-4 dark:border-zinc-500"
           type="text"
           {...register("email", { required: true })}
         />
         {errors.email && <span>This field is required</span>}
         <label>Password</label>
         <input
-          className="rounded border py-1 px-4"
+          className="rounded border py-1 px-4 dark:border-zinc-500"
           autoComplete="current-password"
           type="password"
           {...register("password", { required: true })}
@@ -50,22 +50,16 @@ export const LoginForm = () => {
 
 
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              type="submit"
-              className="group relative flex w-full mr-4 justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              LOGIN
-            </button>
-          </div>
 
-          <div className="text-sm">
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-              RESET PASSWORD
-            </a>
-          </div>
-        </div>
+        <button
+          type="submit"
+          className="relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
+        >
+          LOGIN
+        </button>
+
+
+
 
       </form>
     </div>
@@ -79,9 +73,9 @@ export const SignInPage = () => {
 
 
 
-    <div className='z-20 shadow-2xl w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0 sm:w-full md:w-80 lg:w-80 transition-all p-8'>
-      <div className='flex items-center flex-col align-middle h-full place-content-center pb-10'>
-        <Link href="/">
+    <div className='w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0  transition-all'>
+      <div className='flex items-center flex-col align-middle h-full place-content-center pb-10 dark:bg-zinc-800'>
+        <Link href="/" className="mb-10">
           <Logo />
         </Link>
 
