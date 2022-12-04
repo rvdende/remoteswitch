@@ -81,6 +81,9 @@ model Rdatasource {
   name        String
   description String
   type        String
+  packetCount BigInt  @default(0)
+  dataRx      BigInt  @default(0)
+  dataTx      BigInt  @default(0)
 }
 
 model Rpermission {
