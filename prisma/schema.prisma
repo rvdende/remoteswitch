@@ -48,14 +48,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   password      String?
+  datasources   Rdatasource[]
+  permissions   Rpermission[]
+  isadmin       Boolean?
 }
 
 model VerificationToken {
@@ -64,4 +67,53 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// This is a list of devices and which account they are linked to
+// In future we could add a list of shared users perhaps
+model Rdatasource {
+  id          String    @id @default(cuid())
+  uuid        String    @unique
+  user        User[] //     @relation(fields: [userid], references: [id])
+  userid      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  name        String
+  description String
+  type        String
+  packetCount BigInt    @default(0)
+  dataRx      BigInt    @default(0)
+  dataTx      BigInt    @default(0)
+  inputs      Rinput[]
+  outputs     Routput[]
+}
+
+model Rinput {
+  id            String      @id @default(cuid())
+  rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id])
+  rdatasourceid String
+  name          String
+  description   String
+  type          String
+  value         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Routput {
+  id            String      @id @default(cuid())
+  rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id])
+  rdatasourceid String
+  name          String
+  description   String
+  type          String
+  value         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Rpermission {
+  id    String @id @default(cuid())
+  name  String
+  users User[]
 }

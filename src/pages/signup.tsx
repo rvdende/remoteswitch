@@ -70,7 +70,7 @@ const RegisterForm = () => {
           <p className="text-center text-red-600">This field is required</p>
         )}
 
-        <input type="submit" className="rounded border py-1 px-4 cursor-pointer hover:bg-emerald-500 hover:text-white" />
+        <button type="submit" className="rounded border py-1 px-4 cursor-pointer hover:bg-emerald-500 hover:text-white" />
       </form>
 
       <p> Already have an account? Go to <Link href="/signin" className="text-emerald-500">Sign In</Link> instead.

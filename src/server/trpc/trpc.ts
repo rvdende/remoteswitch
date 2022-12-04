@@ -16,19 +16,37 @@ export const router = t.router;
  * Unprotected procedure
  **/
 export const publicProcedure = t.procedure;
-
+export const middleware = t.middleware;
+export const mergeRouters = t.mergeRouters;
 /**
  * Reusable middleware to ensure
  * users are logged in
  */
-const isAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+// const isAuthed = t.middleware(({ ctx, next }) => {
+//   if (!ctx.session || !ctx.session.user) {
+//     throw new TRPCError({ code: "UNAUTHORIZED" });
+//   }
+//   return next({
+//     ctx: {
+//       // infers the `session` as non-nullable
+//       session: { ...ctx.session, user: ctx.session.user },
+//     },
+//   });
+// });
+
+const isAuthed = middleware(({ next, ctx }) => {
+  const user = ctx.session?.user;
+
+  if (!user?.name) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
+
   return next({
     ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      user: {
+        ...user,
+        name: user.name,
+      },
     },
   });
 });
@@ -37,3 +55,4 @@ const isAuthed = t.middleware(({ ctx, next }) => {
  * Protected procedure
  **/
 export const protectedProcedure = t.procedure.use(isAuthed);
+export const authedProcedure = t.procedure.use(isAuthed);

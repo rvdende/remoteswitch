@@ -58,6 +58,8 @@ export const authOptions: NextAuthOptions = {
       },
       authorize: async (credentials) => {
 
+        console.log(credentials);
+
         const cred = await loginSchema.parseAsync(credentials);
         const user = await prisma.user.findFirst({
           where: { email: cred.email },

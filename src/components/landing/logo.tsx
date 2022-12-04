@@ -19,7 +19,7 @@ export const Logo = () => {
         <span className='mt-0.5'>
             <span className='font-bold'>Remote</span>
             <span className="">Switch</span>
-            <span className="opacity-50 text-sm">.com</span>
+            <span className="opacity-50 text-sm">.net</span>
         </span>
     </div>
 }
