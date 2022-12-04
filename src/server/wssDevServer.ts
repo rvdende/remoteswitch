@@ -5,11 +5,13 @@ import { appRouter } from './trpc/router/_app';
 // import { appRouter } from './routers/app';
 // import { createContext } from './trpc';
 
+import { MQTTServer } from './mqtt/mqttserver';
+
 import fetch from 'node-fetch';
 
 if (!global.fetch) {
     (global as any).fetch = fetch;
-  }
+}
 
 const wss = new ws.Server({
     port: 3001,
@@ -29,6 +31,10 @@ wss.on('connection', (ws) => {
 });
 
 console.log('✅ WebSocket Server listening on ws://localhost:3001');
+
+
+const mqtt = new MQTTServer();
+console.log('✅ MQTT Server listening on mqtt://localhost:1883');
 
 process.on('SIGTERM', () => {
     console.log('SIGTERM');

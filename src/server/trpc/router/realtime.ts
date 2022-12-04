@@ -4,7 +4,7 @@ import { observable } from '@trpc/server/observable';
 import { EventEmitter } from 'events';
 
 // create a global event emitter (could be replaced by redis, etc)
-const ee = new EventEmitter();
+export const ee = new EventEmitter();
 
 export const realtimeRouter = router({
     //   hello: publicProcedure
