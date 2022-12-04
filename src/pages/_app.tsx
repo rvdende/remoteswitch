@@ -1,6 +1,6 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
+import { getSession, SessionProvider } from "next-auth/react";
 
 import { trpc } from "../utils/trpc";
 
@@ -11,7 +11,7 @@ import Head from "next/head";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps,
 }) => {
   return (<ThemeProvider enableSystem={true} attribute="class">
     <Head>
@@ -20,7 +20,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <link rel="icon" href="/favicon.ico" />
     </Head>
 
-    <SessionProvider session={session}>
+    <SessionProvider session={pageProps.session}>
       <div className="w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0 transition-all dark:bg-zinc-800">
         <Component {...pageProps} />
       </div>
@@ -28,6 +28,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
   </ThemeProvider>
   );
+};
+
+MyApp.getInitialProps = async ({ ctx }) => {
+  return {
+    session: await getSession(ctx),
+  };
 };
 
 export default trpc.withTRPC(MyApp);
