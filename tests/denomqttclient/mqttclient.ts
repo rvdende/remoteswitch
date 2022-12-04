@@ -53,6 +53,8 @@ setInterval(async () => {
   const data: PacketSchema = {
     id, // optional packet number. useful if you want replies to queries.
     uuid: "616781a7-4ab5-45e3-96cc-a97233b0df02", // must be on the first packet.. may be on every packet
+    description: "Deno MQTT Tester",
+    type: "Deno MQTT",
     inputs: [{
       name: "Relay A",
       description: "Switch AC Power. True is on.",

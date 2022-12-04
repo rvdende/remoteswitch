@@ -5,13 +5,14 @@ import { generate } from "mqtt-packet";
 import type { Socket } from "net";
 import { prisma } from '@/server/db/client'
 import { ee } from "@/server/trpc/router/realtime";
+import { Rdatasource, Rinput, Routput } from "@prisma/client";
 
 export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPacket) => {
     console.log(`PUBLISH`, packet);
 
 
 
-    console.log(packet)
+    // console.log(packet)
 
     if (!isJson(packet.payload.toString())) return;
 
@@ -33,30 +34,81 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
 
     // check if the device uuid exists.
     const dbentry = await prisma.rdatasource.findFirst({
-        where: { uuid: parsed.uuid }
+        where: { uuid: parsed.uuid },
+        include: {
+            inputs: true,
+            outputs: true
+        }
     })
+
+    console.log(dbentry);
+
+    const dbEntryPrepared = {
+        uuid: parsed.uuid || "",
+        userid: "",
+        name: parsed.name || "",
+        description: parsed.description || "",
+        type: parsed.type || "",
+        inputs: {
+            create: parsed.inputs.map(i => {
+                const input = {
+                    name: i.name,
+                    description: i.description,
+                    type: i.type,
+                    value: (typeof i.value !== "string") ? `${i.value}` : i.value,
+                }
+
+                return input;
+            })
+        },
+        outputs: {
+            create: parsed.outputs.map(i => {
+                const output = {
+                    name: i.name,
+                    description: i.description,
+                    type: i.type,
+                    value: (typeof i.value !== "string") ? `${i.value}` : i.value,
+                }
+
+                return output;
+            })
+        },
+    }
 
     if (!dbentry) {
         console.log('unknown device')
         // add it ?
         await prisma.rdatasource.create({
-            data: {
-                uuid,
-                name: "",
-                description: "",
-                type: "",
-                userid: ""
-            }
+            data: dbEntryPrepared,
         }).then(console.log)
 
     } else {
         console.log('known device!')
         await prisma.rdatasource.update({
             data: {
-                updatedAt: new Date()
+                packetCount: { increment: 1 },
+                dataRx: { increment: packet.payload.length },
+                inputs: {
+                    updateMany: dbEntryPrepared.inputs.create.map( o => {
+                        return { 
+                            where: { name: o.name},
+                            data: { value: o.value }
+                        }
+                    })
+                },
+                outputs: {
+                    updateMany: dbEntryPrepared.outputs.create.map( o => {
+                        return { 
+                            where: { name: o.name},
+                            data: { value: o.value }
+                        }
+                    })
+                }
             },
             where: { uuid }
         })
+
+
     }
 
     //////

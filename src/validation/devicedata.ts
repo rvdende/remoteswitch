@@ -14,8 +14,8 @@ export const deviceDataSchema = z.object({
     id: z.number().optional(),  // packet number
     uuid: z.string().optional(),    // unique identified
     type: z.string().optional(), // type of datasource
+    name: z.string().optional(),
     description: z.string().optional(), // additional description
-
     outputs: dataUnion.array(),
     inputs: dataUnion.array(),
 })

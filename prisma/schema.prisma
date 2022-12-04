@@ -72,18 +72,44 @@ model VerificationToken {
 // This is a list of devices and which account they are linked to
 // In future we could add a list of shared users perhaps
 model Rdatasource {
-  id          String   @id @default(cuid())
-  uuid        String   @unique
+  id          String    @id @default(cuid())
+  uuid        String    @unique
   user        User[] //     @relation(fields: [userid], references: [id])
   userid      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   name        String
   description String
   type        String
-  packetCount BigInt  @default(0)
-  dataRx      BigInt  @default(0)
-  dataTx      BigInt  @default(0)
+  packetCount BigInt    @default(0)
+  dataRx      BigInt    @default(0)
+  dataTx      BigInt    @default(0)
+  inputs      Rinput[]
+  outputs     Routput[]
+}
+
+model Rinput {
+  id            String      @id @default(cuid())
+  rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id])
+  rdatasourceid String
+  name          String
+  description   String
+  type          String
+  value         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Routput {
+  id            String      @id @default(cuid())
+  rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id])
+  rdatasourceid String
+  name          String
+  description   String
+  type          String
+  value         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Rpermission {

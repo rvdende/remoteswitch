@@ -81,7 +81,11 @@ export class MQTTServer extends EventEmitter {
         // })
 
         parser.on('packet', (packet) => {
-            handleMqttPacket(socket, packet);
+            try {
+                handleMqttPacket(socket, packet).catch(err => {
+                    console.log(err.message);
+                });
+            } catch (err) { console.log(err); }
         });
 
     }
