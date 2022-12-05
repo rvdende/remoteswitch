@@ -12,7 +12,7 @@ export const DataSourceCreate = (props: {
     onCreate?: () => void
 }) => {
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const datasourcecreate = trpc.datasource.create.useMutation();
+    const datasourcecreate = trpc.datasource.addToAccount.useMutation();
 
 
 

@@ -74,8 +74,8 @@ model VerificationToken {
 model Rdatasource {
   id          String    @id @default(cuid())
   uuid        String    @unique
-  user        User[] //     @relation(fields: [userid], references: [id])
-  userid      String
+  users       User[]
+  // userid      String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   name        String

@@ -45,7 +45,6 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
 
     const dbEntryPrepared = {
         uuid: parsed.uuid || "",
-        userid: "",
         name: parsed.name || "",
         description: parsed.description || "",
         type: parsed.type || "",

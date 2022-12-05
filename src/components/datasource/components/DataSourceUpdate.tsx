@@ -1,6 +1,11 @@
 import { styles } from "@/components/styles"
 import type { Rdatasource } from "@prisma/client"
 
+// https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-953187833
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+BigInt.prototype.toJSON = function() { return this.toString() }
+
 export const DataSourceUpdate = (props: {
     data: Rdatasource
 }) => {
