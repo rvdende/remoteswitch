@@ -12,9 +12,9 @@ const dataUnion = z.discriminatedUnion("type", [
 
 export const deviceDataSchema = z.object({
     id: z.number().optional(),  // packet number
-    uuid: z.string().optional(),    // unique identified
-    type: z.string().optional(), // type of datasource
-    name: z.string().optional(),
+    uuid: z.string(),    // unique identified
+    type: z.string(), // type of datasource
+    name: z.string(),
     description: z.string().optional(), // additional description
     outputs: dataUnion.array(),
     inputs: dataUnion.array(),

@@ -21,7 +21,7 @@ let handler: any;
 
 async function start() {
     console.log("---------- STARTING SERVER 1 ------------")
-    // await delay(1000);
+    await delay(1000);
     console.log("---------- STARTING SERVER 3 ------------")
     wss = new ws.Server({
         port: 3001,

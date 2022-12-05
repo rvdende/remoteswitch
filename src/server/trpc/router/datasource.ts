@@ -1,6 +1,11 @@
 import { protectedProcedure, router } from "@/server/trpc/trpc";
+import type { Rdatasource, Rinput, Routput } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { observable } from "@trpc/server/observable";
+import EventEmitter from "events";
 import { z } from "zod";
+
+export const realtimeEvents = new EventEmitter();
 
 export const datasourceRouter = router({
     addToAccount: protectedProcedure.input(z.object({
@@ -61,7 +66,9 @@ export const datasourceRouter = router({
                         include: {
                             users: {
                                 select: { email: true }
-                            }
+                            },
+                            inputs: true,
+                            outputs: true
                         }
 
                     }
@@ -84,5 +91,43 @@ export const datasourceRouter = router({
             // return ctx.prisma.rdatasource.findMany({
             //     where: { userid: {  } }
             // })
+        }),
+    realtime: protectedProcedure
+        .input(z.object({ uuid: z.string() }))
+        .subscription(async ({ ctx, input }) => {
+
+            if (ctx.session?.user?.id === undefined) return;
+
+            const check = await ctx.prisma.rdatasource.findFirst({
+                where: {
+                    uuid: input.uuid,
+                    users: {
+                        some: {
+                            id: ctx.session.user.id
+                        }
+                    }
+                }
+            })
+
+            if (!check) throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Can not subscribe to device you are not linked to."
+            });
+
+            return observable<RdataWithInOut>((emit) => {
+                const onData = (data: RdataWithInOut) => {
+                    if (data.uuid === check.uuid) emit.next(data);
+                };
+                realtimeEvents.on('datasource', onData);
+                return () => {
+                    realtimeEvents.off('datasource', onData);
+                }
+            })
         })
 })
+
+export type RdataWithInOut = Rdatasource & {
+    inputs: Rinput[];
+    outputs: Routput[];
+}
+    
