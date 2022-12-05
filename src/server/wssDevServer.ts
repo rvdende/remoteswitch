@@ -15,16 +15,24 @@ if (!global.fetch) {
     (global as any).fetch = fetch;
 }
 
+let mqtt: MQTTServer;
+let wss : ws.Server<ws.WebSocket>;
+let handler: any;
+
 async function start() {
-    await delay(1000);
-    const wss = new ws.Server({
+    console.log("---------- STARTING SERVER 1 ------------")
+    // await delay(1000);
+    console.log("---------- STARTING SERVER 3 ------------")
+    wss = new ws.Server({
         port: 3001,
     });
-    const handler = applyWSSHandler({
+    handler = applyWSSHandler({
         wss,
         router: appRouter,
         createContext
     });
+
+    
 
     wss.on('connection', (ws) => {
         console.log(`➕➕ Connection (${wss.clients.size})`);
@@ -36,16 +44,27 @@ async function start() {
 
     console.log('✅ WebSocket Server listening on ws://localhost:3001');
 
-    const mqtt = new MQTTServer();
+    mqtt = new MQTTServer();
     console.log('✅ MQTT Server listening on mqtt://localhost:1883');
 
-    process.on('SIGTERM', () => {
-        console.log('SIGTERM');
-        handler.broadcastReconnectNotification();
-        wss.close();
-    });
+
+
+    
 }
 
+process.on('SIGTERM', () => {
+    console.log('======================== SIGTERM ============================');
+    handler.broadcastReconnectNotification();
+    wss.close();
+    mqtt.close();
+});
 
+process.on("exit", () => {
+    console.log("-===-=-=-=-=_+_+_+-=-=-=-=-=-=")
+    // handler.broadcastReconnectNotification();
+    wss.close();
+    mqtt.close();
+    console.log("-===-=-=-=-= EXIT 1=-=-=-=-=-=-=")
+})
 
 start();

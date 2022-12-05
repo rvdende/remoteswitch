@@ -28,6 +28,8 @@ export const DataSourceCreate = (props: {
             Add Data Source:
         </span>
 
+        <span>{datasourcecreate.error?.message}</span>
+
         <form action=""
             onSubmit={
                 handleSubmit(async (data) => {

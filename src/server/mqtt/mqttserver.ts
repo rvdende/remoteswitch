@@ -41,7 +41,7 @@ export interface SocketExtended extends Socket {
 }
 
 export class MQTTServer extends EventEmitter {
-    server: net.Server;
+    server: net.Server | undefined;
 
     // connectedClients: MQTTClient[] = [];
 
@@ -49,6 +49,12 @@ export class MQTTServer extends EventEmitter {
         super();
         this.server = net.createServer(this.handleClient);
         this.server.listen(1883);
+    }
+    
+
+    close() {
+        if (this.server) this.server.close();
+        delete this.server;
     }
 
     handleClient = (socket: SocketExtended) => {

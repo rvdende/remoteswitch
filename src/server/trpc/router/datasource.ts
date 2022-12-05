@@ -13,6 +13,8 @@ export const datasourceRouter = router({
             include: { users: true }
         })
 
+        console.log(find);
+
         if (find) {
             // then add us to the users.
             return await ctx.prisma.rdatasource.update({
