@@ -18,13 +18,13 @@ export const App = () => {
 
 
     return <>
-        <main className="w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0 transition-all dark:bg-zinc-800">
+        <main className="w-full h-full bg-white overflow-hidden fixed left-0 top-0 bottom-0 dark:bg-zinc-900 transition">
             <Navbar />
             {/* <button onClick={() => {
                 add.mutate({ text: "hello!" })
             }}>POST</button> */}
 
-            <div className="flex p-2">
+            <div className="">
                 <DataSourceList />
             </div>
 

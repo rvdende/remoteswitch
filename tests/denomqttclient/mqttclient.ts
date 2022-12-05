@@ -62,6 +62,18 @@ setInterval(async () => {
             description: "Switch AC Power. True is on.",
             type: "boolean",
             value: false
+        },
+        {
+            name: "Relay B",
+            description: "Switch AC Power. True is on.",
+            type: "boolean",
+            value: false
+        },
+        {
+            name: "Relay C",
+            description: "Switch AC Power. True is on.",
+            type: "boolean",
+            value: false
         }],
         outputs: [{
             name: "temperature",

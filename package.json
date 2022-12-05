@@ -54,6 +54,7 @@
     "clsx": "^1.2.1",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
+    "moment": "^2.29.4",
     "mqtt-packet": "^8.1.2",
     "next": "13.0.5",
     "next-auth": "^4.15.1",

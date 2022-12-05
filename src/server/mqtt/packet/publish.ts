@@ -93,6 +93,9 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
 
         } else {
             console.log('known device!')
+
+            
+
             await prisma.rdatasource.update({
                 data: {
                     packetCount: { increment: 1 },
@@ -117,7 +120,16 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
                 where: { uuid }
             }).catch(err => {
                 console.log(err.message);
-            })
+            });
+
+            // check for new inputs or outputs.
+            // TODO
+            // if (dbentry.inputs.length !== dbEntryPrepared.inputs.create.length ) {
+            //     // difference in inputs.
+            // }
+
+            ///
+
         }
 
         const dbentryFinal = await prisma.rdatasource.findFirst({

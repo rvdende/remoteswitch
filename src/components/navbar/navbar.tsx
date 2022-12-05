@@ -65,7 +65,7 @@ export function Navbar(props: {
     </IconButton>
 
     return (
-        <Disclosure as="nav" className="bg-white dark:bg-zinc-800">
+        <Disclosure as="nav" className="bg-white dark:bg-zinc-900 transition">
             {({ open }) => (
                 <>
                     <Container>

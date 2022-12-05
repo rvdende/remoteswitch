@@ -10,7 +10,7 @@ const className = {
     block: "bg-white sm:mx-auto w-full sm:overflow-hidden rounded-2xl border-8 border-zinc-200 shadow-xl mb-10 relative dark:bg-zinc-800 dark:border-zinc-700",
     blockAlt: "border-t-2 bg-zinc-50 p-6 dark:bg-zinc-700 ",
 
-    paper: "shadow-xl p-2 bg-gradient-to-t from-zinc-100 to-white border rounded"
+    paper: "shadow-2xl p-2 bg-gradient-to-br from-zinc-50 to-sky-50 border-2 border-zinc-200 rounded-xl dark:from-zinc-900 dark:to-zinc-800 dark:border-zinc-800"
 }
 
 export const styles = className;
