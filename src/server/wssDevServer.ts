@@ -1,11 +1,11 @@
 import { applyWSSHandler } from '@trpc/server/adapters/ws';
 import ws from 'ws';
-import { createContext } from './trpc/context';
-import { appRouter } from './trpc/router/_app';
+import { createContext } from '@/server/trpc/context';
+import { appRouter } from '@/server/trpc/router/_app';
 // import { appRouter } from './routers/app';
 // import { createContext } from './trpc';
 
-import { MQTTServer } from './mqtt/mqttserver';
+import { MQTTServer } from '@/server/mqtt/mqttserver';
 
 import fetch from 'node-fetch';
 import { delay } from '@/utils/delay';

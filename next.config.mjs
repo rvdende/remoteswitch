@@ -18,6 +18,7 @@ const config = {
     // Will be available on both server and client
     APP_URL: process.env.APP_URL,
     WS_URL: process.env.WS_URL,
-  }
+  },
+  output: "standalone",
 };
 export default config;
