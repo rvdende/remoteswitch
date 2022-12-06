@@ -20,7 +20,7 @@ export function DataSourceList() {
             }} />
 
 
-            <div className="mt-4 ">
+            <div className="mt-4 grid gap-2 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                 {datasources.data?.map(ds => {
                     return <DataSourceUpdate key={ds.id} data={ds} />
                 })}

@@ -12,7 +12,6 @@ import _ from "lodash";
 export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPacket) => {
 
     try {
-
         // console.log(packet)
 
         if (!isJson(packet.payload.toString())) return;
@@ -84,7 +83,7 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
         }
 
         if (!dbentry) {
-            console.log('unknown device')
+            console.log('unknown device adding!')
             // add it ?
             await prisma.rdatasource.create({
                 data: dbEntryPrepared,
@@ -93,12 +92,9 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
             })
 
         } else {
-            console.log('known device!')
-
-
-
             await prisma.rdatasource.update({
                 data: {
+                    name: dbEntryPrepared.name,
                     packetCount: { increment: 1 },
                     dataRx: { increment: packet.payload.length },
                     inputs: {
@@ -119,33 +115,26 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
                     }
                 },
                 where: { uuid }
-            }).catch(err => {
-                console.log(err.message);
             });
 
             // check for new inputs or outputs.
-            // TODO
-            // if (dbentry.inputs.length !== dbEntryPrepared.inputs.create.length ) {
-
             const inputdiff = compareInputOutputs(dbentry.inputs, dbEntryPrepared.inputs.create)
             const outputdiff = compareInputOutputs(dbentry.outputs, dbEntryPrepared.outputs.create)
-            console.log(inputdiff);
-
-            await prisma.rdatasource.update({
+            if (inputdiff || outputdiff ) await prisma.rdatasource.update({
                 where: { uuid },
                 data: {
-                    inputs: {
+                    inputs: inputdiff && {
                         create: inputdiff.toAdd,
                         deleteMany: inputdiff.toRemove.map(i => ({ id: i.id }))
                     },
-                    outputs: {
+                    outputs: outputdiff && {
                         create: outputdiff.toAdd,
                         deleteMany: outputdiff.toRemove.map(i => ({ id: i.id }))
                     }
                 }
-            })
+            });
+            // done updating device db.
 
-            ///
 
         }
 

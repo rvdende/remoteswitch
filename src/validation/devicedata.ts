@@ -32,10 +32,10 @@ export const compareInputOutputs = (
     itemsExisting: (z.infer<typeof dataGeneric> & { id: string })[],
     itemsNew: z.infer<typeof dataGeneric>[]) => {
 
-    console.log({ itemsExisting, itemsNew })
-
     const toAdd = itemsNew.filter(item => itemsExisting.map(o => o.name).indexOf(item.name) < 0);
     const toRemove = itemsExisting.filter(item => itemsNew.map(o => o.name).indexOf(item.name) < 0);
+
+    if (toAdd.length == 0 && toRemove.length === 0) return;
 
     return { toAdd, toRemove };
 }

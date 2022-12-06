@@ -1,10 +1,11 @@
 import { styles } from "@/components/styles"
+import { useAnimationTimer } from "@/hooks/useAnimationTimer"
 import { RdataWithInOut } from "@/server/trpc/router/datasource"
 import { trpc } from "@/utils/trpc"
 import { deviceDataSchema } from "@/validation/devicedata"
 import type { Rdatasource, Rinput, Routput } from "@prisma/client"
 import clsx from "clsx"
-import moment from "moment"
+import { moment } from "@/utils/momentAlt"
 import { useState } from "react"
 import { z } from "zod"
 
@@ -20,6 +21,7 @@ export const DataSourceUpdate = (props: {
     // const [data, data_set] = useState<z.infer<typeof deviceDataSchema>>();
     const [data, data_set] = useState<RdataWithInOut>(props.data);
     const [hidden, hidden_set] = useState(true);
+    const timer = useAnimationTimer();
 
     trpc.datasource.realtime.useSubscription({ uuid: props.data.uuid },
         {
@@ -36,14 +38,17 @@ export const DataSourceUpdate = (props: {
 
     return <div className={styles.paper}>
 
-        <div className="flex font-mono px-1 opacity-50 pb-1">
-            <span className={clsx(styles.caption, "mb-1 flex-1")}>{ moment(data.updatedAt).fromNow()}</span>
-            <span className={clsx(styles.caption, "mb-1 ml-4")}>PACKETS: {(data.packetCount).toString()}</span>
-            <span className={clsx(styles.caption, "mb-1 ml-4")}>TX: {(data.dataTx / BigInt(1024)).toString()}kb</span>
-            <span className={clsx(styles.caption, "mb-1 ml-4")}>RX: {(data.dataRx / BigInt(1024)).toString()}kb</span>
+        <div className="pl-1">
+            <span>{data.name}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+
+
+
+
+        <div className={clsx("grid gap-2",
+            data.inputs.length < 2 ? "grid-cols-1" : "grid-cols-2"
+        )}>
             {data.inputs.map(i => {
                 return <div key={i.id} className={"w-full border-4 dark:border-blue-800 from-sky-500 to-blue-600 p-4 rounded-lg text-sky-50 font-semibold flex dark:bg-blue-900 dark:hover:bg-blue-800 cursor-pointer transition active:bg-cyan-300 dark:active:bg-cyan-700 bg-gradient-to-tr dark:from-blue-900 dark:to-blue-700 hover:bg-gradient-to-t  active:translate-y-0.5 dark:hover:to-cyan-600"}>
                     <div className="flex-1">{i.name}</div>
@@ -61,11 +66,15 @@ export const DataSourceUpdate = (props: {
             })}
         </div>
 
-        <span 
-        onClick={()=>{ hidden_set(!hidden);}}
-        className={clsx(styles.caption, "px-1 pt-2 text-right opacity-20 cursor-pointer")}>VIEW DATA</span>
+        <div
+            onClick={() => { hidden_set(!hidden); }}
+            className="flex font-mono px-1 opacity-50 pt-1 cursor-pointer hover:opacity-100">
+            <span className={clsx(styles.caption, "mb-1 flex-1")}>{moment(data.updatedAt).fromNow()}</span>
+            <span className={clsx(styles.caption, "mb-1 ml-4")}>PACKETS: {(data.packetCount).toString()}</span>
+            <span className={clsx(styles.caption, "mb-1 ml-4")}>TX: {(data.dataTx / BigInt(1024)).toString()}kb</span>
+            <span className={clsx(styles.caption, "mb-1 ml-4")}>RX: {(data.dataRx / BigInt(1024)).toString()}kb</span>
+        </div>
 
         <pre className={clsx("text-xs font-mono opacity-75", hidden && "hidden")}>{JSON.stringify(data, null, 2)}</pre>
-
     </div>
 }
