@@ -1,5 +1,5 @@
 import { isJson } from "@/utils/isjson";
-import { deviceDataSchema } from "@/validation/devicedata";
+import { compareInputOutputs, deviceDataSchema } from "@/validation/devicedata";
 import type { IPublishPacket, Packet } from "mqtt-packet";
 import { generate } from "mqtt-packet";
 import type { Socket } from "net";
@@ -7,6 +7,7 @@ import { prisma } from '@/server/db/client'
 import { ee } from "@/server/trpc/router/realtime";
 import { Rdatasource, Rinput, Routput } from "@prisma/client";
 import { realtimeEvents } from "@/server/trpc/router/datasource";
+import _ from "lodash";
 
 export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPacket) => {
 
@@ -94,7 +95,7 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
         } else {
             console.log('known device!')
 
-            
+
 
             await prisma.rdatasource.update({
                 data: {
@@ -125,8 +126,24 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
             // check for new inputs or outputs.
             // TODO
             // if (dbentry.inputs.length !== dbEntryPrepared.inputs.create.length ) {
-            //     // difference in inputs.
-            // }
+
+            const inputdiff = compareInputOutputs(dbentry.inputs, dbEntryPrepared.inputs.create)
+            const outputdiff = compareInputOutputs(dbentry.outputs, dbEntryPrepared.outputs.create)
+            console.log(inputdiff);
+
+            await prisma.rdatasource.update({
+                where: { uuid },
+                data: {
+                    inputs: {
+                        create: inputdiff.toAdd,
+                        deleteMany: inputdiff.toRemove.map(i => ({ id: i.id }))
+                    },
+                    outputs: {
+                        create: outputdiff.toAdd,
+                        deleteMany: outputdiff.toRemove.map(i => ({ id: i.id }))
+                    }
+                }
+            })
 
             ///
 
@@ -146,7 +163,7 @@ export const handleMqttPacketPublish = async (socket: Socket, packet: IPublishPa
         }).catch(err => {
             console.log(err.message);
         })
-        
+
         realtimeEvents.emit('datasource', dbentryFinal);
 
         if (packet.qos == 0) return;

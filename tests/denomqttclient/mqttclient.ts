@@ -25,26 +25,33 @@ interface PacketSchema {
     name: string;
     type?: string | undefined;
     description?: string | undefined;
-    outputs: DataUnion[]
-    inputs: DataUnion[]
+    outputs: InputOutputData[]
+    inputs: InputOutputData[]
 }
 
-type DataUnion = ({
-    type: "number";
-    description: string;
-    name: string;
-    value: number;
-} | {
-    type: "string";
+type InputOutputData = {
+    type: string;
     description: string;
     name: string;
     value: string;
-} | {
-    type: "boolean";
-    description: string;
-    name: string;
-    value: boolean;
-})
+}
+
+// type DataUnion = ({
+//     type: "number";
+//     description: string;
+//     name: string;
+//     value: number;
+// } | {
+//     type: "string";
+//     description: string;
+//     name: string;
+//     value: string;
+// } | {
+//     type: "boolean";
+//     description: string;
+//     name: string;
+//     value: boolean;
+// })
 
 
 
@@ -61,25 +68,31 @@ setInterval(async () => {
             name: "Relay A",
             description: "Switch AC Power. True is on.",
             type: "boolean",
-            value: false
+            value: "false"
         },
         {
             name: "Relay B",
             description: "Switch AC Power. True is on.",
             type: "boolean",
-            value: false
+            value: "false"
         },
         {
-            name: "Relay C",
+            name: "Relay D",
             description: "Switch AC Power. True is on.",
             type: "boolean",
-            value: false
+            value: "false"
         }],
         outputs: [{
             name: "temperature",
             description: "ambient air temperature",
             type: "number",
-            value: Math.random() * 100
+            value: `${Math.random() * 100}`
+        },
+        {
+            name: "Relay A",
+            description: "Switch State",
+            type: "boolean",
+            value: `${Math.random() > 0.5}`
         }]
     }
 
