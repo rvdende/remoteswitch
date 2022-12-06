@@ -33,7 +33,7 @@ const createDevice = async (options: {
     inputs: () => InputOutputData[];
     outputs: () => InputOutputData[];
 }) => {
-    await delay(Math.random() * 1000);
+    await delay(Math.random() * 2000);
 
     const client = new Client({ url: 'mqtt://localhost:1883' }); // Deno and Node.js
     // const client = new Client({ url: 'ws://test.mosquitto.org:8081' }); // Browsers
@@ -86,7 +86,7 @@ const createDevice = async (options: {
         }
 
         await client.publish('mqtt', JSON.stringify(data));
-    }, 1000)
+    }, 500)
 
     // await client.disconnect();
 }

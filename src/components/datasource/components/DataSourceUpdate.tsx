@@ -26,7 +26,6 @@ export const DataSourceUpdate = (props: {
     trpc.datasource.realtime.useSubscription({ uuid: props.data.uuid },
         {
             onData: (newdata) => {
-                console.log('sub', newdata);
                 data_set(newdata);
             },
             onError: (err) => {
