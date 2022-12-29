@@ -108,6 +108,33 @@ createDevice({
     },
 })
 
+
+createDevice({
+  uuid: "df4h389fh34uiofh34uiorf",
+  name: "Tiaan's garage door",
+  inputs: () => {
+    return [{
+      name: "Control",
+      description: "Open or close the door",
+      type: "boolean",
+      value: "false"
+    }]
+  },
+  outputs: () => {
+    return [{
+      name: "OpenOrClosed",
+      description: "Is the door open or closed",
+      type: "boolean",
+      value: "false"
+    }, {
+        name: "Busy",
+        description: "Is the door busy",
+        type: "boolean",
+        value: "false"
+      }]
+  }
+})
+
 createDevice({
     uuid: "234567834567dftgyhjn", // must be on the first packet.. may be on every packet
     name: "Rouan Pool Controller",
