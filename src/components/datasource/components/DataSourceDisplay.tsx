@@ -11,6 +11,9 @@ import { z } from "zod";
 import { Menu } from "@headlessui/react";
 
 import { BiDotsVerticalRounded as IconDotsVertical } from "react-icons/all";
+
+import { HeadlessMenu } from "@/components/headless";
+
 // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-953187833
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -50,20 +53,17 @@ export const DataSourceDisplay = (props: { data: RdataWithInOut }) => {
     >
       <div className="flex flex-row pl-1">
         <span className="flex-1">{data.name}</span>
-
-        <Menu>
-          <Menu.Button>
-            <IconDotsVertical className="h-6 w-6" aria-hidden="true" />
-          </Menu.Button>
-          <Menu.Items>
-            <Menu.Item
-              as="button"
-              className="ui-active:bg-blue-500 ui-active:text-white ui-not-active:bg-white ui-not-active:text-black"
-            >
-              {({ active }) => <button>Delete</button>}
-            </Menu.Item>
-          </Menu.Items>
-        </Menu>
+        <HeadlessMenu
+          menu={[
+            {
+              name: "Delete",
+              onClick: () => {
+                console.log("delete");
+              },
+            },
+            { name: "Share", onClick: () => {} },
+          ]}
+        />
       </div>
 
       <div
@@ -123,7 +123,9 @@ export const DataSourceDisplay = (props: { data: RdataWithInOut }) => {
         </span>
       </div>
 
-      <pre className={clsx("font-mono text-xs opacity-75", hidden && "hidden")}>
+      <pre
+        className={clsx("z-0 font-mono text-xs opacity-75", hidden && "hidden")}
+      >
         {JSON.stringify(data, null, 2)}
       </pre>
     </div>
