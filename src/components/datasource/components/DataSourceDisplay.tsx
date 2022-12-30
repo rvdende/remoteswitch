@@ -8,7 +8,9 @@ import clsx from "clsx";
 import { moment } from "@/utils/momentAlt";
 import { useState } from "react";
 import { z } from "zod";
+import { Menu } from "@headlessui/react";
 
+import { BiDotsVerticalRounded as IconDotsVertical } from "react-icons/all";
 // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-953187833
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -16,7 +18,7 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export const DataSourceUpdate = (props: { data: RdataWithInOut }) => {
+export const DataSourceDisplay = (props: { data: RdataWithInOut }) => {
   // const [data, data_set] = useState<z.infer<typeof deviceDataSchema>>();
   const [data, data_set] = useState<RdataWithInOut>(props.data);
   const [hidden, hidden_set] = useState(true);
@@ -46,8 +48,22 @@ export const DataSourceUpdate = (props: { data: RdataWithInOut }) => {
         active ? "border-red-200 bg-opacity-50 to-red-100" : ""
       )}
     >
-      <div className="pl-1">
-        <span>{data.name}</span>
+      <div className="flex flex-row pl-1">
+        <span className="flex-1">{data.name}</span>
+
+        <Menu>
+          <Menu.Button>
+            <IconDotsVertical className="h-6 w-6" aria-hidden="true" />
+          </Menu.Button>
+          <Menu.Items>
+            <Menu.Item
+              as="button"
+              className="ui-active:bg-blue-500 ui-active:text-white ui-not-active:bg-white ui-not-active:text-black"
+            >
+              {({ active }) => <button>Delete</button>}
+            </Menu.Item>
+          </Menu.Items>
+        </Menu>
       </div>
 
       <div
