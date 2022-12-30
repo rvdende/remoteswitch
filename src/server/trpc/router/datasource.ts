@@ -8,126 +8,134 @@ import { z } from "zod";
 export const realtimeEvents = new EventEmitter();
 
 export const datasourceRouter = router({
-    addToAccount: protectedProcedure.input(z.object({
-        uuid: z.string()
-    })).mutation(async ({ ctx, input }) => {
-
-        // check
-        const find = await ctx.prisma.rdatasource.findFirst({
-            where: { uuid: input.uuid, },
-            include: { users: true }
-        })
-
-        console.log(find);
-
-        if (find) {
-            // then add us to the users.
-            return await ctx.prisma.rdatasource.update({
-                where: { uuid: input.uuid },
-                data: {
-                    users: { connect: { id: ctx.session?.user?.id } }
-                }
-            })
-        }
-
-        // if (find && find.userid !== ctx.user.id) throw new TRPCError({
-        //     code: "FORBIDDEN",
-        //     message: `Device with this uuid already added by ${find.user[]}.`
-        // });
-
-        // if (find && find.userid === ctx.user.id) throw new TRPCError({
-        //     code: "FORBIDDEN",
-        //     message: `Device with this uuid already added by you.`
-        // })
-
-
-        return new TRPCError({ code: "NOT_FOUND", message: "The device with this uuid was not found." })
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.rdatasource.delete({
+        where: { id: input.id },
+      });
     }),
-    findMany: protectedProcedure
-        .query(async ({ ctx }) => {
+  addToAccount: protectedProcedure
+    .input(
+      z.object({
+        uuid: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // check
+      const find = await ctx.prisma.rdatasource.findFirst({
+        where: { uuid: input.uuid },
+        include: { users: true },
+      });
 
-            if (ctx.session?.user?.id === undefined) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" })
+      console.log(find);
 
-            // const data = await ctx.prisma.rdatasource.findMany({
-            //     where: {
-            //         users: { id: ctx.session?.user?.id }
-            //     },
-            //     include: {
-            //         users: true
-            //     }
-            // })
+      if (find) {
+        // then add us to the users.
+        return await ctx.prisma.rdatasource.update({
+          where: { uuid: input.uuid },
+          data: {
+            users: { connect: { id: ctx.session?.user?.id } },
+          },
+        });
+      }
 
-            const data = await ctx.prisma.user.findFirst({
-                where: {
-                    id: ctx.session.user.id
-                },
-                select: {
-                    datasources: {
-                        include: {
-                            users: {
-                                select: { email: true }
-                            },
-                            inputs: true,
-                            outputs: true
-                        }
+      // if (find && find.userid !== ctx.user.id) throw new TRPCError({
+      //     code: "FORBIDDEN",
+      //     message: `Device with this uuid already added by ${find.user[]}.`
+      // });
 
-                    }
-                }
-            })
+      // if (find && find.userid === ctx.user.id) throw new TRPCError({
+      //     code: "FORBIDDEN",
+      //     message: `Device with this uuid already added by you.`
+      // })
 
+      return new TRPCError({
+        code: "NOT_FOUND",
+        message: "The device with this uuid was not found.",
+      });
+    }),
+  findMany: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.session?.user?.id === undefined)
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
-            // da data.findFirst({
+    // const data = await ctx.prisma.rdatasource.findMany({
+    //     where: {
+    //         users: { id: ctx.session?.user?.id }
+    //     },
+    //     include: {
+    //         users: true
+    //     }
+    // })
 
-            //     where: { id: ctx.session?.user?.id },
-            //     include: {
-            //         datasources: {
-            //             include: { users: true }
-            //         }
-            //     }
-            // })
+    const data = await ctx.prisma.user.findFirst({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        datasources: {
+          include: {
+            users: {
+              select: { email: true },
+            },
+            inputs: true,
+            outputs: true,
+          },
+        },
+      },
+    });
 
-            return data?.datasources;
+    // da data.findFirst({
 
-            // return ctx.prisma.rdatasource.findMany({
-            //     where: { userid: {  } }
-            // })
-        }),
-    realtime: protectedProcedure
-        .input(z.object({ uuid: z.string() }))
-        .subscription(async ({ ctx, input }) => {
+    //     where: { id: ctx.session?.user?.id },
+    //     include: {
+    //         datasources: {
+    //             include: { users: true }
+    //         }
+    //     }
+    // })
 
-            if (ctx.session?.user?.id === undefined) return;
+    return data?.datasources;
 
-            const check = await ctx.prisma.rdatasource.findFirst({
-                where: {
-                    uuid: input.uuid,
-                    users: {
-                        some: {
-                            id: ctx.session.user.id
-                        }
-                    }
-                }
-            })
+    // return ctx.prisma.rdatasource.findMany({
+    //     where: { userid: {  } }
+    // })
+  }),
+  realtime: protectedProcedure
+    .input(z.object({ uuid: z.string() }))
+    .subscription(async ({ ctx, input }) => {
+      if (ctx.session?.user?.id === undefined) return;
 
-            if (!check) throw new TRPCError({
-                code: "UNAUTHORIZED",
-                message: "Can not subscribe to device you are not linked to."
-            });
+      const check = await ctx.prisma.rdatasource.findFirst({
+        where: {
+          uuid: input.uuid,
+          users: {
+            some: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+      });
 
-            return observable<RdataWithInOut>((emit) => {
-                const onData = (data: RdataWithInOut) => {
-                    if (data.uuid === check.uuid) emit.next(data);
-                };
-                realtimeEvents.on('datasource', onData);
-                return () => {
-                    realtimeEvents.off('datasource', onData);
-                }
-            })
-        })
-})
+      if (!check)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Can not subscribe to device you are not linked to.",
+        });
+
+      return observable<RdataWithInOut>((emit) => {
+        const onData = (data: RdataWithInOut) => {
+          if (data.uuid === check.uuid) emit.next(data);
+        };
+        realtimeEvents.on("datasource", onData);
+        return () => {
+          realtimeEvents.off("datasource", onData);
+        };
+      });
+    }),
+});
 
 export type RdataWithInOut = Rdatasource & {
-    inputs: Rinput[];
-    outputs: Routput[];
-}
-    
+  inputs: Rinput[];
+  outputs: Routput[];
+};

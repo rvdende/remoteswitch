@@ -21,11 +21,16 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export const DataSourceDisplay = (props: { data: RdataWithInOut }) => {
+export const DataSourceDisplay = (props: {
+  data: RdataWithInOut;
+  updateNeeded: () => void;
+}) => {
   // const [data, data_set] = useState<z.infer<typeof deviceDataSchema>>();
   const [data, data_set] = useState<RdataWithInOut>(props.data);
   const [hidden, hidden_set] = useState(true);
   const timer = useAnimationTimer();
+
+  const deleteDatasource = trpc.datasource.delete.useMutation();
 
   trpc.datasource.realtime.useSubscription(
     { uuid: props.data.uuid },
@@ -57,8 +62,10 @@ export const DataSourceDisplay = (props: { data: RdataWithInOut }) => {
           menu={[
             {
               name: "Delete",
-              onClick: () => {
-                console.log("delete");
+              onClick: async () => {
+                console.log("delete", data);
+                await deleteDatasource.mutateAsync({ id: data.id });
+                props.updateNeeded();
               },
             },
             { name: "Share", onClick: () => {} },
