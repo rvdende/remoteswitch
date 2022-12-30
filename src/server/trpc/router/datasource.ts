@@ -5,7 +5,11 @@ import { observable } from "@trpc/server/observable";
 import EventEmitter from "events";
 import { z } from "zod";
 
-export const realtimeEvents = new EventEmitter();
+declare interface REventEmitter extends EventEmitter {
+  //   on(event: "datasource")
+}
+
+export const realtimeEvents = new EventEmitter() as REventEmitter;
 
 export const datasourceRouter = router({
   delete: protectedProcedure
@@ -14,6 +18,14 @@ export const datasourceRouter = router({
       return await ctx.prisma.rdatasource.delete({
         where: { id: input.id },
       });
+    }),
+  send: protectedProcedure
+    .input(
+      z.object({ uuid: z.string(), inputId: z.string(), value: z.string() })
+    )
+    .mutation(async ({ ctx, input }) => {
+      console.log(input);
+      return {};
     }),
   addToAccount: protectedProcedure
     .input(

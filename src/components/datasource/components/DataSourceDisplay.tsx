@@ -31,6 +31,7 @@ export const DataSourceDisplay = (props: {
   const timer = useAnimationTimer();
 
   const deleteDatasource = trpc.datasource.delete.useMutation();
+  const sendDatasource = trpc.datasource.send.useMutation();
 
   trpc.datasource.realtime.useSubscription(
     { uuid: props.data.uuid },
@@ -86,6 +87,20 @@ export const DataSourceDisplay = (props: {
               className={
                 "flex w-full cursor-pointer rounded-lg border-4 bg-gradient-to-tr from-sky-500 to-blue-600 p-4 font-semibold text-sky-50 transition hover:bg-gradient-to-t active:translate-y-0.5 active:bg-cyan-300 dark:border-blue-800 dark:bg-blue-900 dark:from-blue-900 dark:to-blue-700 dark:hover:bg-blue-800  dark:hover:to-cyan-600 dark:active:bg-cyan-700"
               }
+              onClick={() => {
+                let value = i.value;
+
+                if (i.type === "boolean" && i.value === "false") value = "true";
+                if (i.type === "boolean" && i.value === "true") value = "false";
+
+                console.log(i);
+                console.log(data);
+                sendDatasource.mutate({
+                  uuid: data.uuid,
+                  inputId: i.id,
+                  value,
+                });
+              }}
             >
               <div className="flex-1">{i.name}</div>
               <div className="font-mono">{i.value}</div>
