@@ -1,12 +1,13 @@
+/** @type {import("next").NextConfig} */
+
 // @ts-check
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
  * This is especially useful for Docker builds.
  */
-!process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
+// !process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
 
-/** @type {import("next").NextConfig} */
-const config = {
+const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   i18n: {
@@ -21,4 +22,5 @@ const config = {
   },
   output: "standalone",
 };
-export default config;
+
+module.exports = nextConfig;
