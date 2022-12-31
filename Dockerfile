@@ -10,7 +10,7 @@ RUN pnpm install
 RUN SKIP_ENV_VALIDATION=1 pnpm build
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
-ARG DATABASE_URL
+ENV DATABASE_URL "file:/data/db/db.sqlite"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
