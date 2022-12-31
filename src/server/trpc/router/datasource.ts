@@ -6,12 +6,19 @@ import EventEmitter from "events";
 import { z } from "zod";
 
 declare interface REventEmitter extends EventEmitter {
-  //   on(event: "datasource")
+  /** when we receive a message from a datasource or device */
+  on(event: "datasource", listener: (data: RdataWithInOut) => void): this;
+  /** when we send a message to a datasource or device */
+  on(
+    event: "send",
+    listener: (data: { uuid: string; inputId: string; value: string }) => void
+  ): this;
 }
 
 export const realtimeEvents = new EventEmitter() as REventEmitter;
 
 export const datasourceRouter = router({
+  /** delete a datasource */
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -19,14 +26,20 @@ export const datasourceRouter = router({
         where: { id: input.id },
       });
     }),
+  /** send data to a datasource */
   send: protectedProcedure
     .input(
       z.object({ uuid: z.string(), inputId: z.string(), value: z.string() })
     )
     .mutation(async ({ ctx, input }) => {
+      realtimeEvents.emit("send", input);
+      // TODO: check if the datasource is online
       console.log(input);
+      // TODO: return success/fail from the device
       return {};
     }),
+
+  /** add a datasource to an account */
   addToAccount: protectedProcedure
     .input(
       z.object({
@@ -67,6 +80,7 @@ export const datasourceRouter = router({
         message: "The device with this uuid was not found.",
       });
     }),
+  /** get all datasources for an account */
   findMany: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.session?.user?.id === undefined)
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -113,6 +127,7 @@ export const datasourceRouter = router({
     //     where: { userid: {  } }
     // })
   }),
+  /** listen to realtime updates on a datasource */
   realtime: protectedProcedure
     .input(z.object({ uuid: z.string() }))
     .subscription(async ({ ctx, input }) => {

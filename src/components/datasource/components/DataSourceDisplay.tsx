@@ -33,14 +33,17 @@ export const DataSourceDisplay = (props: {
   const deleteDatasource = trpc.datasource.delete.useMutation();
   const sendDatasource = trpc.datasource.send.useMutation();
 
-  trpc.datasource.realtime.useSubscription(
+  const datasourceRealtime = trpc.datasource.realtime.useSubscription(
     { uuid: props.data.uuid },
     {
+      onStarted: () => {
+        console.log("datasourceRealtime started");
+      },
       onData: (newdata) => {
         data_set(newdata);
       },
       onError: (err) => {
-        console.log(err);
+        console.log("datasource.realtime error:", err);
       },
     }
   );

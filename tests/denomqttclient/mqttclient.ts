@@ -32,8 +32,11 @@ const createDevice = async (options: {
   outputs: () => InputOutputData[];
 }) => {
   await delay(Math.random() * 2000);
-
-  const client = new Client({ url: "mqtt://localhost:1883" }); // Deno and Node.js
+  const decoder = new TextDecoder();
+  const client = new Client({
+    url: "mqtt://localhost:1883",
+    clientId: options.uuid,
+  }); // Deno and Node.js
   // const client = new Client({ url: 'ws://test.mosquitto.org:8081' }); // Browsers
 
   await client.connect();
@@ -43,8 +46,14 @@ const createDevice = async (options: {
   await client.subscribe("mqtt");
   console.log("subscribed");
 
-  client.on("message", (topic: string, payload: string) => {
-    console.log(topic, payload);
+  client.on("message", (topic: string, payload: Uint8Array) => {
+    const data = JSON.parse(decoder.decode(payload));
+
+    console.log({ topic, data });
+  });
+
+  client.on("error", (error: Error) => {
+    console.log("error");
   });
 
   let id = 0;
@@ -80,6 +89,7 @@ const createDevice = async (options: {
     };
 
     await client.publish("mqtt", JSON.stringify(data));
+    console.log(`${new Date().toISOString()} published`);
   }, 500);
 
   // await client.disconnect();
