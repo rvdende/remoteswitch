@@ -8,6 +8,7 @@ processes = []
 [build]
   [build.args]
     NEXT_TELEMETRY_DISABLED = "1"
+    DATABASE_URL = "file:/data/db/db.sqlite"
 
 [env]
     PORT = "8080"
