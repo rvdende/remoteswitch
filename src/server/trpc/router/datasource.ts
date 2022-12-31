@@ -31,10 +31,9 @@ export const datasourceRouter = router({
     .input(
       z.object({ uuid: z.string(), inputId: z.string(), value: z.string() })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       realtimeEvents.emit("send", input);
       // TODO: check if the datasource is online
-      console.log(input);
       // TODO: return success/fail from the device
       return {};
     }),
@@ -53,8 +52,6 @@ export const datasourceRouter = router({
         include: { users: true },
       });
 
-      console.log(find);
-
       if (find) {
         // then add us to the users.
         return await ctx.prisma.rdatasource.update({
@@ -65,16 +62,6 @@ export const datasourceRouter = router({
         });
       }
 
-      // if (find && find.userid !== ctx.user.id) throw new TRPCError({
-      //     code: "FORBIDDEN",
-      //     message: `Device with this uuid already added by ${find.user[]}.`
-      // });
-
-      // if (find && find.userid === ctx.user.id) throw new TRPCError({
-      //     code: "FORBIDDEN",
-      //     message: `Device with this uuid already added by you.`
-      // })
-
       return new TRPCError({
         code: "NOT_FOUND",
         message: "The device with this uuid was not found.",
@@ -84,15 +71,6 @@ export const datasourceRouter = router({
   findMany: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.session?.user?.id === undefined)
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-
-    // const data = await ctx.prisma.rdatasource.findMany({
-    //     where: {
-    //         users: { id: ctx.session?.user?.id }
-    //     },
-    //     include: {
-    //         users: true
-    //     }
-    // })
 
     const data = await ctx.prisma.user.findFirst({
       where: {
@@ -111,21 +89,7 @@ export const datasourceRouter = router({
       },
     });
 
-    // da data.findFirst({
-
-    //     where: { id: ctx.session?.user?.id },
-    //     include: {
-    //         datasources: {
-    //             include: { users: true }
-    //         }
-    //     }
-    // })
-
     return data?.datasources;
-
-    // return ctx.prisma.rdatasource.findMany({
-    //     where: { userid: {  } }
-    // })
   }),
   /** listen to realtime updates on a datasource */
   realtime: protectedProcedure

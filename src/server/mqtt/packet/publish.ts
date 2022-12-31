@@ -1,6 +1,6 @@
 import { isJson } from "@/utils/isjson";
 import { compareInputOutputs, deviceDataSchema } from "@/validation/devicedata";
-import type { IPublishPacket, Packet } from "mqtt-packet";
+import type { IPublishPacket } from "mqtt-packet";
 import { generate } from "mqtt-packet";
 import type { Socket } from "net";
 import { prisma } from "@/server/db/client";
@@ -12,28 +12,21 @@ export const handleMqttPacketPublish = async (
   packet: IPublishPacket
 ) => {
   try {
-    // console.log(packet)
-
     if (!isJson(packet.payload.toString())) return;
 
     const payloadJSON = JSON.parse(packet.payload.toString());
-    // console.log(payloadJSON);
 
     // validate with zod.
-    const parsedZod = await deviceDataSchema.safeParse(payloadJSON);
+    const parsedZod = deviceDataSchema.safeParse(payloadJSON);
 
     if (!parsedZod.success) {
       console.log("Zod parse failed.");
-
       console.log(parsedZod.error.format());
-
       return;
     }
 
     const parsed = parsedZod.data;
-
     if (!parsed) return;
-
     const uuid = parsed.uuid;
     if (!uuid) {
       console.log(

@@ -3,8 +3,8 @@ import { createTRPCNext } from "@trpc/next";
 import type { inferProcedureOutput } from "@trpc/server";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
-import { wsLink, createWSClient } from '@trpc/client/links/wsLink';
-import getConfig from 'next/config';
+import { wsLink, createWSClient } from "@trpc/client/links/wsLink";
+import getConfig from "next/config";
 import { type AppRouter } from "../server/trpc/router/_app";
 import type { NextPageContext } from "next";
 
@@ -12,14 +12,14 @@ const { publicRuntimeConfig } = getConfig();
 
 const { APP_URL, WS_URL } = publicRuntimeConfig;
 
-const getBaseUrl = () => {
-  if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-  return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
-};
+// const getBaseUrl = () => {
+//   if (typeof window !== "undefined") return ""; // browser should use relative url
+//   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+//   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+// };
 
 function getEndingLink(ctx: NextPageContext | undefined) {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return httpBatchLink({
       url: `${APP_URL}/api/trpc`,
       headers() {
@@ -27,7 +27,7 @@ function getEndingLink(ctx: NextPageContext | undefined) {
           // on ssr, forward client's headers to the server
           return {
             ...ctx.req.headers,
-            'x-ssr': '1',
+            "x-ssr": "1",
           };
         }
         return {};
@@ -35,7 +35,7 @@ function getEndingLink(ctx: NextPageContext | undefined) {
     });
   }
 
-  console.log(publicRuntimeConfig)
+  console.log(publicRuntimeConfig);
 
   const client = createWSClient({
     url: WS_URL,
@@ -77,12 +77,11 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-
 // export const transformer = superjson;
 /**
  * This is a helper method to infer the output of a query resolver
  * @example type HelloOutput = inferQueryOutput<'hello'>
  */
 export type inferQueryOutput<
-  TRouteKey extends keyof AppRouter['_def']['queries'],
-> = inferProcedureOutput<AppRouter['_def']['queries'][TRouteKey]>;
+  TRouteKey extends keyof AppRouter["_def"]["queries"]
+> = inferProcedureOutput<AppRouter["_def"]["queries"][TRouteKey]>;
