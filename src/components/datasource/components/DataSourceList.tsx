@@ -1,6 +1,5 @@
 import { trpc } from "@/utils/trpc";
 import { DataSourceCreate, DataSourceDisplay } from "@/components";
-import { styles } from "@/components/styles";
 import { Container } from "@/components/landing";
 
 export function DataSourceList() {

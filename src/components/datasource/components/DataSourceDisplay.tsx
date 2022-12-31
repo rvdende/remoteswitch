@@ -1,16 +1,13 @@
 import { styles } from "@/components/styles";
 import { useAnimationTimer } from "@/hooks/useAnimationTimer";
-import { RdataWithInOut } from "@/server/trpc/router/datasource";
+import type { RdataWithInOut } from "@/server/trpc/router/datasource";
 import { trpc } from "@/utils/trpc";
-import { deviceDataSchema } from "@/validation/devicedata";
-import type { Rdatasource, Rinput, Routput } from "@prisma/client";
 import clsx from "clsx";
 import { moment } from "@/utils/momentAlt";
 import { useState } from "react";
-import { z } from "zod";
-import { Menu } from "@headlessui/react";
 
-import { BiDotsVerticalRounded as IconDotsVertical } from "react-icons/all";
+// TODO use dots for menu
+// import { BiDotsVerticalRounded as IconDotsVertical } from "react-icons/all";
 
 import { HeadlessMenu } from "@/components/headless";
 
@@ -28,12 +25,12 @@ export const DataSourceDisplay = (props: {
   // const [data, data_set] = useState<z.infer<typeof deviceDataSchema>>();
   const [data, data_set] = useState<RdataWithInOut>(props.data);
   const [hidden, hidden_set] = useState(true);
-  const timer = useAnimationTimer();
+  useAnimationTimer();
 
   const deleteDatasource = trpc.datasource.delete.useMutation();
   const sendDatasource = trpc.datasource.send.useMutation();
 
-  const datasourceRealtime = trpc.datasource.realtime.useSubscription(
+  trpc.datasource.realtime.useSubscription(
     { uuid: props.data.uuid },
     {
       onStarted: () => {
@@ -72,7 +69,7 @@ export const DataSourceDisplay = (props: {
                 props.updateNeeded();
               },
             },
-            { name: "Share", onClick: () => {} },
+            // { name: "Share", onClick: () => {} },
           ]}
         />
       </div>

@@ -1,31 +1,17 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
-// import DiscordProvider from "next-auth/providers/discord";
-// Prisma adapter for NextAuth, optional and can be removed
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-
-// import { env } from "../../../env/server.mjs";
 import { prisma } from "../../../server/db/client";
 import { loginSchema } from "@/validation/auth";
 import bcrypt from "bcrypt";
 
-
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
-    session({ session, user, token }) {
-
+    session({ session, token }) {
       if (session.user && token) {
         session.user.id = token.uid as string;
       }
-      return session;
-
-      //   // if (session.user) {
-      //   //   session.user.id = user.id;
-      //   // }
-
-      //   console.log({ session, user });
-
       return session;
     },
     async jwt({ token, account, user }) {
@@ -37,15 +23,8 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
-  // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
   providers: [
-    // DiscordProvider({
-    //   clientId: env.DISCORD_CLIENT_ID,
-    //   clientSecret: env.DISCORD_CLIENT_SECRET,
-    // }),
-    // ...add more providers here
-
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -57,9 +36,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-
-        console.log(credentials);
-
         const cred = await loginSchema.parseAsync(credentials);
         const user = await prisma.user.findFirst({
           where: { email: cred.email },
@@ -83,11 +59,10 @@ export const authOptions: NextAuthOptions = {
         return user;
       },
     }),
-
   ],
   session: {
-    strategy: "jwt"
-  }
+    strategy: "jwt",
+  },
 };
 
 export default NextAuth(authOptions);

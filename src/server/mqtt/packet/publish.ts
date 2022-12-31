@@ -5,7 +5,6 @@ import { generate } from "mqtt-packet";
 import type { Socket } from "net";
 import { prisma } from "@/server/db/client";
 import { realtimeEvents } from "@/server/trpc/router/datasource";
-import _ from "lodash";
 
 export const handleMqttPacketPublish = async (
   socket: Socket,
@@ -90,30 +89,34 @@ export const handleMqttPacketPublish = async (
           console.log(err.message);
         });
     } else {
-      await prisma.rdatasource.update({
-        data: {
-          name: dbEntryPrepared.name,
-          packetCount: { increment: 1 },
-          dataRx: { increment: packet.payload.length },
-          inputs: {
-            updateMany: dbEntryPrepared.inputs.create.map((o) => {
-              return {
-                where: { name: o.name },
-                data: { value: o.value },
-              };
-            }),
+      await prisma.rdatasource
+        .update({
+          data: {
+            name: dbEntryPrepared.name,
+            packetCount: { increment: 1 },
+            dataRx: { increment: packet.payload.length },
+            inputs: {
+              updateMany: dbEntryPrepared.inputs.create.map((o) => {
+                return {
+                  where: { name: o.name },
+                  data: { value: o.value },
+                };
+              }),
+            },
+            outputs: {
+              updateMany: dbEntryPrepared.outputs.create.map((o) => {
+                return {
+                  where: { name: o.name },
+                  data: { value: o.value },
+                };
+              }),
+            },
           },
-          outputs: {
-            updateMany: dbEntryPrepared.outputs.create.map((o) => {
-              return {
-                where: { name: o.name },
-                data: { value: o.value },
-              };
-            }),
-          },
-        },
-        where: { uuid },
-      });
+          where: { uuid },
+        })
+        .catch((err) => {
+          console.log(err);
+        });
 
       // check for new inputs or outputs.
       const inputdiff = compareInputOutputs(
@@ -125,19 +128,23 @@ export const handleMqttPacketPublish = async (
         dbEntryPrepared.outputs.create
       );
       if (inputdiff || outputdiff)
-        await prisma.rdatasource.update({
-          where: { uuid },
-          data: {
-            inputs: inputdiff && {
-              create: inputdiff.toAdd,
-              deleteMany: inputdiff.toRemove.map((i) => ({ id: i.id })),
+        await prisma.rdatasource
+          .update({
+            where: { uuid },
+            data: {
+              inputs: inputdiff && {
+                create: inputdiff.toAdd,
+                deleteMany: inputdiff.toRemove.map((i) => ({ id: i.id })),
+              },
+              outputs: outputdiff && {
+                create: outputdiff.toAdd,
+                deleteMany: outputdiff.toRemove.map((i) => ({ id: i.id })),
+              },
             },
-            outputs: outputdiff && {
-              create: outputdiff.toAdd,
-              deleteMany: outputdiff.toRemove.map((i) => ({ id: i.id })),
-            },
-          },
-        });
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
       // done updating device db.
     }
 
@@ -168,7 +175,9 @@ export const handleMqttPacketPublish = async (
         messageId: packet.messageId,
       })
     );
-  } catch (err: any) {
-    console.log(err.message);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+  } catch (err: Error) {
+    if (err?.message) console.log(err.message);
   }
 };

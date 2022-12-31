@@ -1,81 +1,64 @@
 import { styles } from "@/components/styles";
-import { trpc } from "@/utils/trpc"
-import clsx from 'clsx';
-import { useState } from "react";
+import { trpc } from "@/utils/trpc";
+import clsx from "clsx";
+// import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface IDatasourceCreateForm {
-    uuid: string
+  uuid: string;
 }
 
-export const DataSourceCreate = (props: {
-    onCreate?: () => void
-}) => {
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const datasourcecreate = trpc.datasource.addToAccount.useMutation();
+export const DataSourceCreate = (props: { onCreate?: () => void }) => {
+  // const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const datasourcecreate = trpc.datasource.addToAccount.useMutation();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IDatasourceCreateForm>();
 
+  return (
+    <div>
+      <span className={styles.caption}>Add Data Source:</span>
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<IDatasourceCreateForm>();
+      <span>{datasourcecreate.error?.message}</span>
 
-    return <div>
+      <form
+        action=""
+        onSubmit={handleSubmit(async (data) => {
+          // setErrorMessage(undefined);
+          await datasourcecreate.mutateAsync(data);
 
-        <span className={styles.caption}>
-            Add Data Source:
-        </span>
+          // run onCreate event if it exists
+          props.onCreate && props.onCreate();
+        })}
+      >
+        {datasourcecreate.error && (
+          <p className="text-red-600">
+            <pre>{JSON.stringify(datasourcecreate.error, null, 2)}</pre>
+          </p>
+        )}
 
-        <span>{datasourcecreate.error?.message}</span>
+        <div className="flex flex-row">
+          <input
+            placeholder="Enter device UUID to add to your account."
+            {...register("uuid", { required: true })}
+            className={clsx(styles.input, "rounded-r-none")}
+          />
 
-        <form action=""
-            onSubmit={
-                handleSubmit(async (data) => {
-                    setErrorMessage(undefined);
-                    await datasourcecreate.mutateAsync(data);
+          <button
+            type="submit"
+            className={clsx(styles.button, "rounded-l-none")}
+          >
+            Add
+          </button>
+        </div>
 
-                    // run onCreate event if it exists
-                    props.onCreate && props.onCreate();
-                })
-            }
-        >
-
-            {datasourcecreate.error && (
-                <p className="text-red-600">
-                    <pre>{JSON.stringify(datasourcecreate.error, null, 2)}</pre>
-                </p>
-            )}
-
-            <div className="flex flex-row">
-
-                <input
-                    placeholder="Enter device UUID to add to your account."
-
-                    {...register(
-                        "uuid",
-                        { required: true })
-                    }
-                    className={clsx(
-                        styles.input,
-                        "rounded-r-none"
-                    )}
-                />
-
-                <button type="submit"
-                    className={clsx(
-                        styles.button,
-                        "rounded-l-none")}>
-                    Add
-                </button>
-
-            </div>
-
-            {errors.uuid && (
-                <p className="text-center text-red-600">This field is required</p>
-            )}
-
-        </form>
+        {errors.uuid && (
+          <p className="text-center text-red-600">This field is required</p>
+        )}
+      </form>
     </div>
-}
+  );
+};
