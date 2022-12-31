@@ -1,41 +1,66 @@
-# Install dependencies only when needed
-FROM node:16-alpine AS builder
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+##### DEPENDENCIES
+
+FROM --platform=linux/amd64 node:16-alpine AS deps
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
+
+# Install Prisma Client - remove if not using Prisma
+
+COPY prisma ./
+
+# Install dependencies based on the preferred package manager
+
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml\* ./
+
+RUN \
+ if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+ elif [ -f package-lock.json ]; then npm ci; \
+ elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
+ else echo "Lockfile not found." && exit 1; \
+ fi
+
+##### BUILDER
+
+FROM --platform=linux/amd64 node:16-alpine AS builder
+ARG DATABASE_URL
+ARG NEXT_PUBLIC_CLIENTVAR
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN yarn install --frozen-lockfile
 
-# If using npm with a `package-lock.json` comment out above and use below instead
-# RUN npm ci
+# ENV NEXT_TELEMETRY_DISABLED 1
 
-ENV NEXT_TELEMETRY_DISABLED 1
+RUN \
+ if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
+ elif [ -f package-lock.json ]; then SKIP_ENV_VALIDATION=1 npm run build; \
+ elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && SKIP_ENV_VALIDATION=1 pnpm run build; \
+ else echo "Lockfile not found." && exit 1; \
+ fi
 
-# Add `ARG` instructions below if you need `NEXT_PUBLIC_` variables
-# then put the value on your fly.toml
-# Example:
-# ARG NEXT_PUBLIC_EXAMPLE="value here"
+##### RUNNER
 
-RUN yarn build
-
-# If using npm comment out above and use below instead
-# RUN npm run build
-
-# Production image, copy all the files and run next
-FROM node:16-alpine AS runner
+FROM --platform=linux/amd64 node:16-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+
+# ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app ./
+COPY --from=builder /app/next.config.mjs ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+COPY . .
 
 USER nextjs
+EXPOSE 3000
+EXPOSE 1883
+ENV PORT 3000
 
-CMD ["yarn", "start"]
-
-# If using npm comment out above and use below instead
-# CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
