@@ -1,6 +1,6 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 
-import { registerSchema } from "@/validation/auth";
+import { registerSchema } from "../../../validation/auth";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcrypt";
 
@@ -36,7 +36,7 @@ export const authRouter = router({
         data: {
           name,
           email,
-          password: hash
+          password: hash,
         },
       });
 

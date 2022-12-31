@@ -3,7 +3,7 @@ import { generate } from "mqtt-packet";
 import type { SocketExtended } from "../mqttserver";
 import { handleMqttPacketPublish } from "./publish";
 import { handleMqttPacketSubscribe } from "./subscribe";
-import { realtimeEvents } from "@/server/trpc/router/datasource";
+import { realtimeEvents } from "../../trpc/router/datasource";
 
 export const handleMqttPacket = async (
   socket: SocketExtended,

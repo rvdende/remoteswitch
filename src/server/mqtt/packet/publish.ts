@@ -1,10 +1,14 @@
-import { isJson } from "@/utils/isjson";
-import { compareInputOutputs, deviceDataSchema } from "@/validation/devicedata";
+import { isJson } from "../../../utils/isjson";
+import {
+  compareInputOutputs,
+  deviceDataSchema,
+} from "../../../validation/devicedata";
 import type { IPublishPacket } from "mqtt-packet";
 import { generate } from "mqtt-packet";
 import type { Socket } from "net";
-import { prisma } from "@/server/db/client";
-import { realtimeEvents } from "@/server/trpc/router/datasource";
+import { prisma } from "../../db/client";
+// import { realtimeEvents } from "@/server/trpc/router/datasource";
+import { realtimeEvents } from "../../trpc/router/datasource";
 
 export const handleMqttPacketPublish = async (
   socket: Socket,

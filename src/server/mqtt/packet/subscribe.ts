@@ -1,4 +1,4 @@
-import { isJson } from "@/utils/isjson";
+import { isJson } from "../../../utils/isjson";
 import type { ISubscribePacket } from "mqtt-packet";
 import { generate } from "mqtt-packet";
 // import type { Socket } from "net";
