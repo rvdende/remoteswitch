@@ -16,7 +16,7 @@ processes = []
     NODE_ENV = "production"
     NEXT_TELEMETRY_DISABLED = "1"
     DATABASE_URL = "file:/data/db/db.sqlite"
-    NEXTAUTH_URL = "https://remoteswitch.net"
+    NEXTAUTH_URL = "https://remoteswitch.net/"
     WS_URL = "wss://remoteswitch.net"
 
 [experimental]
