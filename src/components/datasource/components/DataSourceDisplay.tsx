@@ -97,7 +97,8 @@ export const DataSourceDisplay = (props: {
                 console.log(data);
                 sendDatasource.mutate({
                   uuid: data.uuid,
-                  inputId: i.id,
+                  // inputId: i.id,
+                  uid: i.uid,
                   value,
                 });
               }}

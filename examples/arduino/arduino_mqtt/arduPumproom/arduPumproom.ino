@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #define CONFIG_SERVER "192.168.1.192"
+// #define CONFIG_SERVER "remoteswitch.net"
 #define CONFIG_MQTTPORT 1883
 #define CONFIG_UUID "fgh4738fhdasfnsdifh8frh342f"
 // TODO - make this a config option eeprom
@@ -13,7 +14,7 @@
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
-const byte pin_relayA = 6;
+const byte pin_relayA = 13;
 const byte pin_relayB = 7;
 volatile bool state_relayA = false;
 volatile bool state_relayB = false;
@@ -36,8 +37,24 @@ const int mqttPort = CONFIG_MQTTPORT;
 volatile bool shouldSendUpdate = false;
 long lastReconnectAttempt = 0;
 
+// INPUTS
+
+/// INPUT 1
+ StaticJsonDocument<200> input1;
+
+// OUTPUTS
+
+void updateInputOutputs() {
+    input1["uid"] = "input_relay_a";
+    input1["name"] = "RelayA";
+    input1["type"] = "boolean";
+    input1["value"] = state_relayA ? "true" : "false";
+    input1["description"] = "Desc";
+}
+
 void setup()
 {
+  updateInputOutputs();
   delay(1500);
   Serial.begin(115200);
   delay(1500);
@@ -61,8 +78,8 @@ void loop()
 
 void device_loop()
 {
-    // digitalWrite(pin_relayA, state_relayA);
-    // digitalWrite(pin_relayB, state_relayB);
+    digitalWrite(pin_relayA, state_relayA);
+    digitalWrite(pin_relayB, state_relayB);
 
     if (millis() - lastHeartbeat > 3000)
     {
@@ -182,6 +199,31 @@ void handleMessages(char *topic, byte *payload, unsigned int length)
     
     serializeJsonPretty(incomingjson, SerialUSB);
 
+    if (incomingjson.containsKey("uid"))
+    {
+        SerialUSB.println("UID parsing..");
+        String uid = incomingjson["uid"].as<String>();
+        String uid1 = input1["uid"].as<String>();        
+        SerialUSB.println(uid);
+        SerialUSB.println(uid1);
+        if (uid == uid1) 
+        {
+            SerialUSB.println("Found matching UID");
+            String value = incomingjson["value"].as<String>();
+            if (value == "true")
+            {
+                state_relayA = true;
+            }
+            else
+            {
+                state_relayA = false;
+            }
+        }
+        
+        updateInputOutputs();
+        sendState();
+    }
+
     // if (incomingjson.containsKey("data"))
     // {
     //     JsonObject data = incomingjson["data"];
@@ -263,11 +305,12 @@ void sendState()
     JsonArray inputs = root.createNestedArray("inputs");
 
     // INPUT 1
-    StaticJsonDocument<200> input1;
-    input1["name"] = "RelayA";
-    input1["type"] = "boolean";
-    input1["value"] = state_relayA ? "true" : "false";
-    input1["description"] = "Desc";
+    // StaticJsonDocument<200> input1;
+    // input1["uid"] = input1_uid;
+    // input1["name"] = "RelayA";
+    // input1["type"] = "boolean";
+    // input1["value"] = state_relayA ? "true" : "false";
+    // input1["description"] = "Desc";
 
     inputs.add(input1);
    

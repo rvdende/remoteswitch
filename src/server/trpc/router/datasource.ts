@@ -29,7 +29,11 @@ export const datasourceRouter = router({
   /** send data to a datasource */
   send: protectedProcedure
     .input(
-      z.object({ uuid: z.string(), inputId: z.string(), value: z.string() })
+      z.object({
+        uuid: z.string(),
+        uid: z.string(),
+        value: z.string(),
+      })
     )
     .mutation(async ({ input }) => {
       realtimeEvents.emit("send", input);

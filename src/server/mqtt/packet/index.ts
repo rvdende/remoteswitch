@@ -9,26 +9,22 @@ export const handleMqttPacket = async (
   socket: SocketExtended,
   packet: Packet
 ) => {
-  console.log(packet);
-
   if (packet.cmd === "connect") {
     console.log(`${new Date().toISOString()} new device connected on mqtt.`);
-    console.log(packet);
 
     realtimeEvents.on("send", (data) => {
-      console.log("send", data);
       if (data.uuid === packet.clientId) {
-        console.log("sending to device");
-        socket.write(
-          generate({
-            cmd: "publish",
-            topic: "mqtt",
-            payload: JSON.stringify(data),
-            qos: 0,
-            dup: false,
-            retain: false,
-          })
-        );
+        if (socket.writable)
+          socket.write(
+            generate({
+              cmd: "publish",
+              topic: "mqtt",
+              payload: JSON.stringify(data),
+              qos: 0,
+              dup: false,
+              retain: false,
+            })
+          );
       }
     });
 

@@ -92,6 +92,7 @@ model Rdatasource {
 model Rinput {
   id            String      @id @default(cuid())
   rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id], onDelete: Cascade)
+  uid           String      @default("")
   rdatasourceid String
   name          String
   description   String
@@ -104,6 +105,7 @@ model Rinput {
 model Routput {
   id            String      @id @default(cuid())
   rdatasource   Rdatasource @relation(fields: [rdatasourceid], references: [id], onDelete: Cascade)
+  uid           String      @default("")
   rdatasourceid String
   name          String
   description   String

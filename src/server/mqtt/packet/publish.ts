@@ -15,11 +15,12 @@ export const handleMqttPacketPublish = async (
   packet: IPublishPacket
 ) => {
   try {
-    console.log(packet.payload.toString());
-    if (!isJson(packet.payload.toString())) return;
+    if (!isJson(packet.payload.toString())) {
+      console.log(packet.payload.toString());
+      return;
+    }
 
     const payloadJSON = JSON.parse(packet.payload.toString());
-    console.log(payloadJSON);
     // validate with zod.
     const parsedZod = deviceDataSchema.safeParse(payloadJSON);
 
@@ -60,6 +61,7 @@ export const handleMqttPacketPublish = async (
       inputs: {
         create: parsed.inputs.map((i) => {
           const input = {
+            uid: i.uid,
             name: i.name,
             description: i.description,
             type: i.type,
@@ -72,6 +74,7 @@ export const handleMqttPacketPublish = async (
       outputs: {
         create: parsed.outputs.map((i) => {
           const output = {
+            uid: i.uid,
             name: i.name,
             description: i.description,
             type: i.type,
@@ -103,7 +106,7 @@ export const handleMqttPacketPublish = async (
             inputs: {
               updateMany: dbEntryPrepared.inputs.create.map((o) => {
                 return {
-                  where: { name: o.name },
+                  where: { uid: o.uid },
                   data: { value: o.value },
                 };
               }),
@@ -111,7 +114,7 @@ export const handleMqttPacketPublish = async (
             outputs: {
               updateMany: dbEntryPrepared.outputs.create.map((o) => {
                 return {
-                  where: { name: o.name },
+                  where: { uid: o.uid },
                   data: { value: o.value },
                 };
               }),

@@ -49,7 +49,9 @@ export class MQTTServer extends EventEmitter {
     socket.on("end", () => {
       console.log(`mqtt client end`);
     });
-    // socket.on("error", (err) => { console.log(`mqtt client error: ${err.message}`); })
+    socket.on("error", (err) => {
+      console.log(`mqtt client error: ${err.message}`);
+    });
     socket.on("timeout", () => {
       console.log(`mqtt client timeout`);
     });
