@@ -15,10 +15,11 @@ export const handleMqttPacketPublish = async (
   packet: IPublishPacket
 ) => {
   try {
+    console.log(packet.payload.toString());
     if (!isJson(packet.payload.toString())) return;
 
     const payloadJSON = JSON.parse(packet.payload.toString());
-
+    console.log(payloadJSON);
     // validate with zod.
     const parsedZod = deviceDataSchema.safeParse(payloadJSON);
 

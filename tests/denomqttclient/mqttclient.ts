@@ -34,7 +34,8 @@ const createDevice = async (options: {
   await delay(Math.random() * 2000);
   const decoder = new TextDecoder();
   const client = new Client({
-    url: "mqtt://localhost:1883",
+    // url: "mqtt://localhost:1883",
+    url: "mqtts://remoteswitch.net",
     clientId: options.uuid,
   }); // Deno and Node.js
   // const client = new Client({ url: 'ws://test.mosquitto.org:8081' }); // Browsers
