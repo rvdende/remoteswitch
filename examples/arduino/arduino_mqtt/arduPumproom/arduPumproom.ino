@@ -15,9 +15,6 @@
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
-const byte pin_relayA = 13;
-const byte pin_relayB = 7;
-
 long lastHeartbeat = 0;
 volatile bool shouldsendstate = true;
 
@@ -25,17 +22,13 @@ volatile bool shouldsendstate = true;
 const char *name = CONFIG_NAME;
 const char *uuid = CONFIG_UUID;
 const char *type = CONFIG_TYPE;
-// CONNECTION
 const char *mqttServer = CONFIG_SERVER;
 const int mqttPort = CONFIG_MQTTPORT;
-
-// make random for each device!
-
-// INTERNAL STATE
 volatile bool shouldSendUpdate = false;
 long lastReconnectAttempt = 0;
 
-// INPUTS
+const byte pin_relayA = 13;
+const byte pin_relayB = 7;
 
 /// INPUT 1
 StaticJsonDocument<200> input1;
@@ -47,13 +40,13 @@ void setupInputOutputs() {
     input1["name"] = "RelayA";
     input1["type"] = "boolean";
     input1["value"] = "false"; // state_relayA ? "true" : "false";
-    input1["description"] = String("pin:", pin_relayA);
+    input1["description"] = "Pin number is " + String(pin_relayA);
   
     input2["uid"] = "input_relay_b";
     input2["name"] = "RelayB";
     input2["type"] = "boolean";
     input2["value"] = "false"; // state_relayB ? "true" : "false";
-    input2["description"] = "Desc";
+    input2["description"] = "Pin number is " + String(pin_relayB);
 }
 
 void setup()
@@ -66,7 +59,7 @@ void setup()
   SerialUSB.println(CONFIG_UUID);
   SerialUSB.println("bootup");
   
-  nautilus_setup();
+  client_setup();
   pinMode(pin_relayA, OUTPUT);
   pinMode(pin_relayB, OUTPUT);
 }
@@ -103,28 +96,18 @@ void device_loop()
 
 boolean reconnect()
 {
-    //Serial.println(F("Connecting to MQTT..."));
-    // char mqttPassword[64];
-    // const char *first = "key-";
-    // strcpy(mqttPassword, first);
-    // strcat(mqttPassword, apikey);
-
     if (client.connect(uuid))
     {
         sendState();
-        // subscribe();
-        //Serial.println("C1");
     }
     else
     {
-        //Serial.print("C0");
-        //Serial.print(client.state());
-        nautilus_setup(); // reconnect ethernet
+        client_setup(); // reconnect ethernet
     }
     return client.connected();
 }
 
-void nautilus_setup()
+void client_setup()
 {
     //Serial.println(F("nautilus_setup.."));
     client.setBufferSize(1024); // https://pubsubclient.knolleary.net/api#setBufferSize
