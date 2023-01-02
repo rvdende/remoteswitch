@@ -1,12 +1,12 @@
+#include "config.h" // EDIT YOUR UUID KEY. Copy config.example.h.
 #include <ArduinoJson.h>
 #include <Ethernet.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
 
-#define CONFIG_SERVER "192.168.1.192"
-// #define CONFIG_SERVER "remoteswitch.net"
+// #define CONFIG_SERVER "192.168.1.192"
+#define CONFIG_SERVER "remoteswitch.net"
 #define CONFIG_MQTTPORT 1883
-#define CONFIG_UUID "fgh4738fhdasfnsdifh8frh342f"
 // TODO - make this a config option eeprom
 #define CONFIG_NAME "Arduino Relay Controller"
 #define CONFIG_TYPE "Arduino MQTT Ethernet Relay Controller"
@@ -16,10 +16,7 @@ PubSubClient client(ethClient);
 
 const byte pin_relayA = 13;
 const byte pin_relayB = 7;
-volatile bool state_relayA = false;
-volatile bool state_relayB = false;
-volatile bool control_relayA = false;
-volatile bool control_relayB = false;
+
 long lastHeartbeat = 0;
 volatile bool shouldsendstate = true;
 
@@ -40,21 +37,27 @@ long lastReconnectAttempt = 0;
 // INPUTS
 
 /// INPUT 1
- StaticJsonDocument<200> input1;
-
+StaticJsonDocument<200> input1;
+StaticJsonDocument<200> input2;
 // OUTPUTS
 
-void updateInputOutputs() {
+void setupInputOutputs() {
     input1["uid"] = "input_relay_a";
     input1["name"] = "RelayA";
     input1["type"] = "boolean";
-    input1["value"] = state_relayA ? "true" : "false";
-    input1["description"] = "Desc";
+    input1["value"] = "false"; // state_relayA ? "true" : "false";
+    input1["description"] = String("pin:", pin_relayA);
+  
+    input2["uid"] = "input_relay_b";
+    input2["name"] = "RelayB";
+    input2["type"] = "boolean";
+    input2["value"] = "false"; // state_relayB ? "true" : "false";
+    input2["description"] = "Desc";
 }
 
 void setup()
 {
-  updateInputOutputs();
+  setupInputOutputs();
   delay(1500);
   Serial.begin(115200);
   delay(1500);
@@ -63,8 +66,8 @@ void setup()
   SerialUSB.println("bootup");
   
   nautilus_setup();
-    pinMode(pin_relayA, OUTPUT);
-    pinMode(pin_relayB, OUTPUT);
+  pinMode(pin_relayA, OUTPUT);
+  pinMode(pin_relayB, OUTPUT);
 }
 
 void loop()
@@ -78,6 +81,8 @@ void loop()
 
 void device_loop()
 {
+    bool state_relayA = input1["value"].as<String>() == "true";
+    bool state_relayB = input2["value"].as<String>() == "true";
     digitalWrite(pin_relayA, state_relayA);
     digitalWrite(pin_relayB, state_relayB);
 
@@ -122,7 +127,7 @@ void nautilus_setup()
 {
     //Serial.println(F("nautilus_setup.."));
     client.setBufferSize(1024); // https://pubsubclient.knolleary.net/api#setBufferSize
-    byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x75, 0x96};
+    byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x75, 0x97};
     Ethernet.begin(mac);
     // auto link = Ethernet.linkStatus();
     // Serial.print(link);
@@ -132,18 +137,6 @@ void nautilus_setup()
     lastReconnectAttempt = 0;
 }
 
-
-// void subscribe()
-// {
-//     //Serial.println(F("Subscribing.."));
-//     DynamicJsonDocument doc(96);
-//     JsonObject root = doc.to<JsonObject>();
-//     root["apikey"] = apikey;
-//     root["id"] = id; // remove to subscribe to all devices
-//     char output[96];
-//     serializeJson(doc, output);
-//     client.subscribe(output);
-// }
 
 void mqtt_loop()
 {
@@ -175,17 +168,9 @@ void mqtt_loop()
             sendState();
         }
     }
-
-    // int winddir = analogRead(A1);
-    // winddirection = winddir;
-    //// Serial.print("winddir");
-    //// Serial.println(winddirection);
-    // delay(1000);
 }
 
-// MQTT
 
-// MQTT
 void handleMessages(char *topic, byte *payload, unsigned int length)
 {
     DynamicJsonDocument incomingjson(1024);
@@ -197,102 +182,22 @@ void handleMessages(char *topic, byte *payload, unsigned int length)
         return;
     }
     
-    serializeJsonPretty(incomingjson, SerialUSB);
+    // serializeJsonPretty(incomingjson, SerialUSB);
 
     if (incomingjson.containsKey("uid"))
     {
-        SerialUSB.println("UID parsing..");
-        String uid = incomingjson["uid"].as<String>();
-        String uid1 = input1["uid"].as<String>();        
-        SerialUSB.println(uid);
-        SerialUSB.println(uid1);
-        if (uid == uid1) 
-        {
-            SerialUSB.println("Found matching UID");
-            String value = incomingjson["value"].as<String>();
-            if (value == "true")
-            {
-                state_relayA = true;
-            }
-            else
-            {
-                state_relayA = false;
-            }
-        }
-        
-        updateInputOutputs();
-        sendState();
+      if (incomingjson["uid"].as<String>() == input1["uid"].as<String>()) {
+        input1["value"] = incomingjson["value"].as<String>();
+      }
+
+      if (incomingjson["uid"].as<String>() == input2["uid"].as<String>()) {
+        input2["value"] = incomingjson["value"].as<String>();
+      }
+
+      sendState();
     }
 
-    // if (incomingjson.containsKey("data"))
-    // {
-    //     JsonObject data = incomingjson["data"];
-    //     if (data.containsKey("control_relayA"))
-    //     {
-    //         state_relayA = !state_relayA;
-    //         shouldSendUpdate = true;
-    //     }
-    //     if (data.containsKey("control_relayB"))
-    //     {
-    //         state_relayB = !state_relayB;
-    //         shouldSendUpdate = true;
-    //     }
-    // }
-    /*
-    for (int i = 0; i < length; i++)
-    {
-        Serial.print((char)payload[i]);
-        inData[i] = (char)payload[i];
-    }
-    Serial.println();
-    // parse json
-    String inSerialString = inData;
-    
-    StaticJsonDocument<200> requestDoc;
-    DeserializationError error = deserializeJson(requestDoc, inData);
-    JsonObject request = requestDoc.as<JsonObject>();
-
-    // Test if parsing succeeds.
-    if (error)
-    {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-        return;
-    }
-
-    // PROCESS INCOMING CONTROL COMMANDS
-    if (request.containsKey("data"))
-    {
-        JsonObject data = request["data"];
-        if (data.containsKey("relay_control"))
-        {
-            //relay_state = !relay_state;
-            shouldSendUpdate = true;
-        }
-    }*/
 }
-
-//////////////
-// SEND STATE
-
-// void sendState()
-// {
-//     shouldsendstate = false;
-//     JsonObject root = doc.to<JsonObject>();
-//     root["id"] = id;
-//     // root["type"] = type;
-//     JsonObject data = root.createNestedObject("data");
-//     // data["test"] = "test";
-//     data["wind_deg"] = wind_deg;
-//     data["wind_ms"] = wind_ms;
-//     data["rain_mm"] = rain_mm;
-//     // data["rainamount"] = rainamount;
-//     char textbuffer[96];
-//     size_t length = serializeJson(doc, textbuffer);
-//     Serial.println(textbuffer);
-//     client.publish(apikey, textbuffer, length);
-// }
-
 
 void sendState()
 {    
@@ -303,25 +208,12 @@ void sendState()
     root["type"] = type;
 
     JsonArray inputs = root.createNestedArray("inputs");
-
-    // INPUT 1
-    // StaticJsonDocument<200> input1;
-    // input1["uid"] = input1_uid;
-    // input1["name"] = "RelayA";
-    // input1["type"] = "boolean";
-    // input1["value"] = state_relayA ? "true" : "false";
-    // input1["description"] = "Desc";
-
     inputs.add(input1);
-   
+    inputs.add(input2);
     
     JsonArray outputs = root.createNestedArray("outputs");
     
-    //JsonObject data = root.createNestedObject("data");
-    // data["test"] = "test";
-    //data["state_relayA"] = state_relayA;
-    //data["state_relayB"] = state_relayB;
-    // data["rainamount"] = rainamount;
+
     char textbuffer[512];
     size_t length = serializeJson(doc, textbuffer);
     SerialUSB.println(textbuffer);
