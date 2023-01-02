@@ -28,25 +28,42 @@ volatile bool shouldSendUpdate = false;
 long lastReconnectAttempt = 0;
 
 const byte pin_relayA = 13;
-const byte pin_relayB = 7;
+const byte pin_relayB = 12;
+const byte pin_relayC = 11;
+const byte pin_relayD = 9;
 
 /// INPUT 1
 StaticJsonDocument<200> input1;
 StaticJsonDocument<200> input2;
+StaticJsonDocument<200> input3;
+StaticJsonDocument<200> input4;
+
 // OUTPUTS
 
 void setupInputOutputs() {
     input1["uid"] = "input_relay_a";
     input1["name"] = "RelayA";
     input1["type"] = "boolean";
-    input1["value"] = "false"; // state_relayA ? "true" : "false";
+    input1["value"] = "false"; 
     input1["description"] = "Pin number is " + String(pin_relayA);
   
     input2["uid"] = "input_relay_b";
     input2["name"] = "RelayB";
     input2["type"] = "boolean";
-    input2["value"] = "false"; // state_relayB ? "true" : "false";
+    input2["value"] = "false"; 
     input2["description"] = "Pin number is " + String(pin_relayB);
+
+    input3["uid"] = "input_relay_c";
+    input3["name"] = "RelayC";
+    input3["type"] = "boolean";
+    input3["value"] = "false"; 
+    input3["description"] = "Pin number is " + String(pin_relayC);
+
+    input4["uid"] = "input_relay_d";
+    input4["name"] = "RelayD";
+    input4["type"] = "boolean";
+    input4["value"] = "false"; 
+    input4["description"] = "Pin number is " + String(pin_relayD);
 }
 
 void setup()
@@ -62,6 +79,8 @@ void setup()
   client_setup();
   pinMode(pin_relayA, OUTPUT);
   pinMode(pin_relayB, OUTPUT);
+  pinMode(pin_relayC, OUTPUT);
+  pinMode(pin_relayD, OUTPUT);
 }
 
 void loop()
@@ -75,10 +94,12 @@ void loop()
 
 void device_loop()
 {
-    bool state_relayA = input1["value"].as<String>() == "true";
-    bool state_relayB = input2["value"].as<String>() == "true";
-    digitalWrite(pin_relayA, state_relayA);
-    digitalWrite(pin_relayB, state_relayB);
+    // bool state_relayA = input1["value"].as<String>() == "true";
+    // bool state_relayB = input2["value"].as<String>() == "true";
+    digitalWrite(pin_relayA, input1["value"].as<String>() == "true");
+    digitalWrite(pin_relayB, input2["value"].as<String>() == "true");
+    digitalWrite(pin_relayC, input3["value"].as<String>() == "true");
+    digitalWrite(pin_relayD, input4["value"].as<String>() == "true");
 
     if (millis() - lastHeartbeat > 3000)
     {
@@ -178,6 +199,12 @@ void handleMessages(char *topic, byte *payload, unsigned int length)
         input2["value"] = incomingjson["value"].as<String>();
       }
 
+      if (incomingjson["uid"].as<String>() == input3["uid"].as<String>()) {
+        input3["value"] = incomingjson["value"].as<String>();
+      }
+      if (incomingjson["uid"].as<String>() == input4["uid"].as<String>()) {
+        input4["value"] = incomingjson["value"].as<String>();
+      }
       sendState();
     }
 
@@ -185,7 +212,7 @@ void handleMessages(char *topic, byte *payload, unsigned int length)
 
 void sendState()
 {    
-    DynamicJsonDocument doc(512);
+    DynamicJsonDocument doc(1024);
     JsonObject root = doc.to<JsonObject>();
     root["uuid"] = uuid;
     root["name"] = name;
@@ -195,11 +222,13 @@ void sendState()
     JsonArray inputs = root.createNestedArray("inputs");
     inputs.add(input1);
     inputs.add(input2);
+    inputs.add(input3);
+    inputs.add(input4);
     
     JsonArray outputs = root.createNestedArray("outputs");
     
 
-    char textbuffer[512];
+    char textbuffer[1024];
     size_t length = serializeJson(doc, textbuffer);
     SerialUSB.println(textbuffer);
 
