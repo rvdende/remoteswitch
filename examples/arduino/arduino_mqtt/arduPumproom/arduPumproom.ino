@@ -10,6 +10,7 @@
 // TODO - make this a config option eeprom
 #define CONFIG_NAME "Arduino Relay Controller"
 #define CONFIG_TYPE "Arduino MQTT Ethernet Relay Controller"
+#define CONFIG_DESCRIPTION "Rouan pool pump controller prototype"
 
 EthernetClient ethClient;
 PubSubClient client(ethClient);
@@ -206,6 +207,7 @@ void sendState()
     root["uuid"] = uuid;
     root["name"] = name;
     root["type"] = type;
+    root["description"] = CONFIG_DESCRIPTION;
 
     JsonArray inputs = root.createNestedArray("inputs");
     inputs.add(input1);

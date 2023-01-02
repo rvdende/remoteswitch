@@ -101,13 +101,20 @@ export const handleMqttPacketPublish = async (
         .update({
           data: {
             name: dbEntryPrepared.name,
+            description: dbEntryPrepared.description,
+            type: dbEntryPrepared.type,
             packetCount: { increment: 1 },
             dataRx: { increment: packet.payload.length },
             inputs: {
               updateMany: dbEntryPrepared.inputs.create.map((o) => {
                 return {
                   where: { uid: o.uid },
-                  data: { value: o.value },
+                  data: {
+                    name: o.name,
+                    type: o.type,
+                    description: o.description,
+                    value: o.value,
+                  },
                 };
               }),
             },
@@ -115,7 +122,12 @@ export const handleMqttPacketPublish = async (
               updateMany: dbEntryPrepared.outputs.create.map((o) => {
                 return {
                   where: { uid: o.uid },
-                  data: { value: o.value },
+                  data: {
+                    name: o.name,
+                    type: o.type,
+                    description: o.description,
+                    value: o.value,
+                  },
                 };
               }),
             },
