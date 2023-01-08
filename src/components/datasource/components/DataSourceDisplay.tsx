@@ -47,8 +47,8 @@ export const DataSourceDisplay = (props: {
 
   if (!data) return <div>no data...</div>;
 
-  // calculate if the device is not active
-  const active = new Date().getTime() - data.updatedAt.getTime() > 5000;
+  // calculate if the device is not active 5 minute
+  const active = new Date().getTime() - data.updatedAt.getTime() > (1000 * 60 * 5);
 
   return (
     <div
